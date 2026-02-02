@@ -54,7 +54,11 @@ func main() {
 	// Serve index.html for all other routes (SPA fallback)
 	mux.HandleFunc("/", spaHandler)
 
-	addr := ":8070"
+	port := os.Getenv("HTTP_PORT")
+	if port == "" {
+		port = "8080"
+	}
+	addr := fmt.Sprintf(":%s", port)
 	log.Printf("Listening on %s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("server failed: %v", err)

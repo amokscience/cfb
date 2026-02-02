@@ -398,7 +398,10 @@ export default function App() {
                           </td>
                           <td className="text-center" style={getScoreCellColor(teamScore, opponentScore)}>{teamScore}-{opponentScore}</td>
                           <td className="text-center">{teamScore === '-' || opponentScore === '-' ? '-' : parseInt(teamScore, 10) - parseInt(opponentScore, 10)}</td>
-                          <td className="text-center">{teamScore === '-' || opponentScore === '-' ? '-' : Math.floor(Math.abs(parseInt(teamScore, 10) - parseInt(opponentScore, 10)) / 8) + 1}</td>
+                          <td className="text-center">{teamScore === '-' || opponentScore === '-' ? '-' : (() => {
+                            const diff = Math.abs(parseInt(teamScore, 10) - parseInt(opponentScore, 10));
+                            return Math.floor(diff / 8) + (diff % 8 === 0 ? 0 : 1);
+                          })()}</td>
                           <td>{game.venue}</td>
                         </tr>
                       );
