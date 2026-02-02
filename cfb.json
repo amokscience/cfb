@@ -1,0 +1,6849 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This version of the API will be deprecated and replaced in May 2025. Please switch over to the new version as soon as possible. Docs are located at APINext.CollegeFootballData.com.",
+    "version": "4.6.3",
+    "title": "College Football Data API",
+    "contact": {
+      "email": "admin@collegefootballdata.com"
+    }
+  },
+  "host": "api.collegefootballdata.com",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "games",
+      "description": "Games scores and statistics"
+    },
+    {
+      "name": "drives",
+      "description": "Drive data"
+    },
+    {
+      "name": "plays",
+      "description": "Play by play data"
+    },
+    {
+      "name": "teams",
+      "description": "Team information"
+    },
+    {
+      "name": "conferences",
+      "description": "Conference information"
+    },
+    {
+      "name": "venues",
+      "description": "Information about venues"
+    },
+    {
+      "name": "coaches",
+      "description": "Information about coaches"
+    },
+    {
+      "name": "players",
+      "description": "Player information and data"
+    },
+    {
+      "name": "rankings",
+      "description": "Historical poll rankings"
+    },
+    {
+      "name": "betting",
+      "description": "Betting lines and data"
+    },
+    {
+      "name": "recruiting",
+      "description": "Recruiting rankings and data"
+    },
+    {
+      "name": "ratings",
+      "description": "Team rating data"
+    },
+    {
+      "name": "metrics",
+      "description": "Data relating to Predicted Points and other metrics"
+    },
+    {
+      "name": "stats",
+      "description": "Statistical data"
+    },
+    {
+      "name": "draft",
+      "description": "NFL Draft data"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "securityDefinitions": {
+    "ApiKeyAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "paths": {
+    "/games": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Games and results",
+        "description": "Get game results",
+        "operationId": "getGames",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 1869
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "home",
+            "description": "Home team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "away",
+            "description": "Away team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "division",
+            "description": "Division classification filter (fbs/fcs/ii/iii)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "description": "id filter for querying a single game",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Game"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/scoreboard": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Live game results (Patreon only)",
+        "description": "Get live game results",
+        "operationId": "getScoreboard",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "classification",
+            "description": "Classification filter (fbs, fcs, ii, or iii). Defaults to fbs.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter.",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ScoreboardGame"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/records": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Team records",
+        "description": "Get team records by year",
+        "operationId": "getTeamRecords",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1869
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamRecord"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/calendar": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Season calendar",
+        "description": "Get calendar of weeks by season",
+        "operationId": "getCalendar",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Week"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/media": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Game media information and schedules",
+        "description": "Game media information (TV, radio, etc)",
+        "operationId": "getGameMedia",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular, postseason, or both)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "mediaType",
+            "description": "Media type filter (tv, radio, web, ppv, or mobile)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "classification",
+            "description": "Division classification filter (fbs/fcs/ii/iii)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GameMedia"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/weather": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Game weather information (Patreon only)",
+        "description": "Weather information for the hour of kickoff",
+        "operationId": "getGameWeather",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "Game id filter (required if no year)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "year",
+            "description": "Year filter (required if no game id)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular, postseason, or both)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "classification",
+            "description": "Division classification filter (fbs/fcs/ii/iii)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GameWeather"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/players": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Player game stats",
+        "description": "Player stats broken down by game",
+        "operationId": "getPlayerGameStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category",
+            "description": "Category filter (e.g defensive)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gameId",
+            "description": "Game id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerGame"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/games/teams": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Team game stats",
+        "description": "Team stats broken down by game",
+        "operationId": "getTeamGameStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gameId",
+            "description": "Game id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "classification",
+            "description": "Division classification filter (fbs/fcs/ii/iii)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamGame"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/game/box/advanced": {
+      "get": {
+        "tags": [
+          "games"
+        ],
+        "summary": "Advanced box scores",
+        "description": "Get advanced box score data",
+        "operationId": "getAdvancedBoxScore",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "Game id parameters",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/BoxScore"
+            }
+          }
+        }
+      }
+    },
+    "/drives": {
+      "get": {
+        "tags": [
+          "drives"
+        ],
+        "summary": "Drive data and results",
+        "description": "Get game drives",
+        "operationId": "getDrives",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "seasonType",
+            "description": "Season type filter",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offense",
+            "description": "Offensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defense",
+            "description": "Defensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offenseConference",
+            "description": "Offensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defenseConference",
+            "description": "Defensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "classification",
+            "description": "Division classification filter (fbs/fcs/ii/iii)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Drive"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/plays": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Play by play data",
+        "description": "Get play data and results",
+        "operationId": "getPlays",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "seasonType",
+            "description": "Season type filter",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter (required if team, offense, or defense, not specified)",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offense",
+            "description": "Offensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defense",
+            "description": "Defensive team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offenseConference",
+            "description": "Offensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "defenseConference",
+            "description": "Defensive conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "playType",
+            "description": "Play type filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "classification",
+            "description": "Division classification filter (fbs/fcs/ii/iii)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Play"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/live/plays": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Live metrics and PBP (Patreon only)",
+        "description": "Get live metrics and PBP",
+        "operationId": "getLivePlays",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "description": "Game id",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/LivePlayByPlay"
+            }
+          }
+        }
+      }
+    },
+    "/play/types": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Play types",
+        "description": "Types of plays",
+        "operationId": "getPlayTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayType"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/play/stats": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Play stats by play",
+        "description": "Gets player stats associated by play (limit 1000)",
+        "operationId": "getPlayStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2013
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "gameId",
+            "description": "gameId filter (from /games endpoint)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "athleteId",
+            "description": "athleteId filter (from /roster endpoint)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "statTypeId",
+            "description": "statTypeId filter (from /play/stat/types endpoint)",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "regular, postseason, or both",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/play/stat/types": {
+      "get": {
+        "tags": [
+          "plays"
+        ],
+        "summary": "Types of player play stats",
+        "description": "Type of play stats",
+        "operationId": "getPlayStatTypes",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayStatType"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/conferences": {
+      "get": {
+        "tags": [
+          "conferences"
+        ],
+        "summary": "Conferences",
+        "description": "Get conference list",
+        "operationId": "getConferences",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Conference"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/teams": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Team information",
+        "description": "Get team information",
+        "operationId": "getTeams",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/teams/fbs": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "FBS team list",
+        "description": "Information on major division teams",
+        "operationId": "getFbsTeams",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1869
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/roster": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Team rosters",
+        "description": "Roster data",
+        "operationId": "getRoster",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "team",
+            "description": "Team name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "year",
+            "description": "Season year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2009
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Player"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/talent": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Team talent composite rankings",
+        "description": "Team talent composite",
+        "operationId": "getTalent",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2015
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamTalent"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/teams/matchup": {
+      "get": {
+        "tags": [
+          "teams"
+        ],
+        "summary": "Team matchup history",
+        "description": "Matchup history",
+        "operationId": "getTeamMatchup",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "team1",
+            "description": "First team",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "team2",
+            "description": "Second team",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "minYear",
+            "description": "Minimum year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1869
+          },
+          {
+            "name": "maxYear",
+            "description": "Maximum year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1869
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/TeamMatchup"
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/venues": {
+      "get": {
+        "tags": [
+          "venues"
+        ],
+        "summary": "Arena and venue information",
+        "description": "Venues",
+        "operationId": "getVenues",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Venue"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/coaches": {
+      "get": {
+        "tags": [
+          "coaches"
+        ],
+        "summary": "Coaching records and history",
+        "description": "Coaching history",
+        "operationId": "getCoaches",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "firstName",
+            "description": "First name filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "lastName",
+            "description": "Last name filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team name filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1869
+          },
+          {
+            "name": "minYear",
+            "description": "Minimum year filter (inclusive)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1869
+          },
+          {
+            "name": "maxYear",
+            "description": "Maximum year filter (inclusive)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1869
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Coach"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/rankings": {
+      "get": {
+        "tags": [
+          "rankings"
+        ],
+        "summary": "Historical polls and rankings",
+        "description": "Poll rankings",
+        "operationId": "getRankings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 1936
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/RankingWeek"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/lines": {
+      "get": {
+        "tags": [
+          "betting"
+        ],
+        "summary": "Betting lines",
+        "description": "Closing betting lines",
+        "operationId": "getLines",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "Game id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "year",
+            "description": "Year/season filter for games",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2013
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "home",
+            "description": "Home team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "away",
+            "description": "Away team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GameLines"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/recruiting/players": {
+      "get": {
+        "tags": [
+          "recruiting"
+        ],
+        "summary": "Player recruiting ratings and rankings",
+        "description": "Get player recruiting rankings and data. Requires either a year or team to be specified.",
+        "operationId": "getRecruitingPlayers",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Recruiting class year (required if team no specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2000
+          },
+          {
+            "name": "classification",
+            "description": "Type of recruit (HighSchool, JUCO, PrepSchool)",
+            "default": "HighSchool",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "state",
+            "description": "State or province abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Committed team filter (required if year not specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Recruit"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/recruiting/teams": {
+      "get": {
+        "tags": [
+          "recruiting"
+        ],
+        "summary": "Team recruiting rankings and ratings",
+        "description": "Team recruiting rankings",
+        "operationId": "getRecruitingTeams",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Recruiting class year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2000
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamRecruitingRank"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/recruiting/groups": {
+      "get": {
+        "tags": [
+          "recruiting"
+        ],
+        "summary": "Recruit position group ratings",
+        "description": "Gets a list of aggregated statistics by team and position grouping",
+        "operationId": "getRecruitingGroups",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "startYear",
+            "description": "Starting year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2000
+          },
+          {
+            "name": "endYear",
+            "description": "Ending year",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2000
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PositionGroupRecruitingRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ratings/sp": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Historical SP+ ratings",
+        "description": "SP+ rating data",
+        "operationId": "getSPRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter (required if team not specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1970
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if year not specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamSPRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ratings/srs": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Historical SRS ratings",
+        "description": "SRS rating data (requires either a year or team specified)",
+        "operationId": "getSRSRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter (required if team not specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1897
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if year not specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamSRSRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ratings/sp/conferences": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Historical SP+ ratings by conference",
+        "description": "Get average SP+ historical rating data by conference",
+        "operationId": "getConferenceSPRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1970
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ConferenceSPRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ratings/elo": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Historical Elo ratings",
+        "description": "Elo rating data",
+        "operationId": "getEloRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "week",
+            "description": "Maximum week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Maximum season type to consider (defaults to regular if week is specified else defaults to postseason)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamEloRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ratings/fpi": {
+      "get": {
+        "tags": [
+          "ratings"
+        ],
+        "summary": "Historical FPI ratings",
+        "description": "FPI rating data",
+        "operationId": "getFPIRatings",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Season filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamFPIRating"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ppa/predicted": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Predicted Points (i.e. Expected Points or EP)",
+        "description": "Predicted Points",
+        "operationId": "getPredictedPoints",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "down",
+            "description": "Down filter",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4
+          },
+          {
+            "name": "distance",
+            "description": "Distance filter",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 99
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PredictedPoints"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ppa/teams": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Predicted Points Added (PPA/EPA) data by team",
+        "description": "Predicted Points Added (PPA)",
+        "operationId": "getTeamPPA",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter (required if team not specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if year not specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamPPA"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ppa/games": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Team Predicated Points Added (PPA/EPA) by game",
+        "description": "Predicted Points Added (PPA) by game",
+        "operationId": "getGamePPA",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GamePPA"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ppa/players/games": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Player Predicated Points Added (PPA/EPA) broken down by game",
+        "description": "Predicted Points Added (PPA) by player game",
+        "operationId": "getPlayerGamePPA",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2013
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "playerId",
+            "description": "Player id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "threshold",
+            "description": "Minimum play threshold filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular or postseason)",
+            "default": "regular",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerGamePPA"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/ppa/players/season": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Player Predicated Points Added (PPA/EPA) broken down by season",
+        "description": "Predicted Points Added (PPA) by player season",
+        "operationId": "getPlayerSeasonPPA",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2013
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "playerId",
+            "description": "Player id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "threshold",
+            "description": "Minimum play threshold filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerSeasonPPA"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/metrics/fg/ep": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Field Goal Expected Points",
+        "description": "Field Goal Expected Poitns",
+        "operationId": "getFGEP",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FieldGoalExpectedPoints"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/metrics/wp": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Win probability chart data",
+        "description": "Win probability data",
+        "operationId": "getWinProbabilityData",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "gameId",
+            "description": "Game id filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayWP"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/metrics/wp/pregame": {
+      "get": {
+        "tags": [
+          "metrics"
+        ],
+        "summary": "Pregame win probability data",
+        "description": "Pregame win probabilities",
+        "operationId": "getPregameWinProbabilities",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "seasonType",
+            "description": "regular or postseason",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PregameWP"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/stats/season": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Team statistics by season",
+        "description": "Team season stats",
+        "operationId": "getTeamSeasonStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter (required if no team specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if no year specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "startWeek",
+            "description": "Starting week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "endWeek",
+            "description": "Starting week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TeamSeasonStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/stats/season/advanced": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Advanced team metrics by season",
+        "description": "Advanced team season stats",
+        "operationId": "getAdvancedTeamSeasonStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter (required if no team specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if no year specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "startWeek",
+            "description": "Starting week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "endWeek",
+            "description": "Starting week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AdvancedSeasonStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/stats/game/advanced": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Advanced team metrics by game",
+        "description": "Advanced team game stats",
+        "operationId": "getAdvancedTeamGameStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter (required if no team specified)",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2001
+          },
+          {
+            "name": "week",
+            "description": "Week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 16
+          },
+          {
+            "name": "team",
+            "description": "Team filter (required if no year specified)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "opponent",
+            "description": "Opponent filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular, postseason, or both)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AdvancedGameStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/stats/categories": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Team stat categories",
+        "description": "Stat category list",
+        "operationId": "getStatCategories",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/search": {
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Search for player information",
+        "description": "Search for players",
+        "operationId": "playerSearch",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "searchTerm",
+            "description": "Term to search on",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2001
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerSearchResult"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/player/usage": {
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Player usage metrics broken down by season",
+        "description": "Player usage metrics by season",
+        "operationId": "getPlayerUsage",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "default": 2022,
+            "type": "integer",
+            "minimum": 2013
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "Position abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "playerId",
+            "description": "Player id filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "excludeGarbageTime",
+            "description": "Filter to remove garbage time plays from calculations",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerUsage"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/player/returning": {
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Team returning production metrics",
+        "description": "Returning production metrics",
+        "operationId": "getReturningProduction",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "minimum": 2014
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ReturningProduction"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/stats/player/season": {
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Player stats by season",
+        "description": "Season player stats",
+        "operationId": "getPlayerSeasonStats",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "team",
+            "description": "Team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "Conference abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "startWeek",
+            "description": "Start week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "endWeek",
+            "description": "Start week filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "seasonType",
+            "description": "Season type filter (regular, postseason, or both)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category",
+            "description": "Stat category filter (e.g. passing)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PlayerSeasonStat"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/player/portal": {
+      "get": {
+        "tags": [
+          "players"
+        ],
+        "summary": "Transfer portal by season",
+        "description": "Transfer portal by season",
+        "operationId": "getTransferPortal",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/PortalPlayer"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/draft/teams": {
+      "get": {
+        "tags": [
+          "draft"
+        ],
+        "summary": "List of NFL teams",
+        "description": "List of NFL teams",
+        "operationId": "getNFLTeams",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DraftTeam"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/draft/positions": {
+      "get": {
+        "tags": [
+          "draft"
+        ],
+        "summary": "List of NFL positions",
+        "description": "List of NFL positions",
+        "operationId": "getNFLPositions",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DraftPosition"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    },
+    "/draft/picks": {
+      "get": {
+        "tags": [
+          "draft"
+        ],
+        "summary": "List of NFL Draft picks",
+        "description": "List of NFL Draft picks",
+        "operationId": "getDraftPicks",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "year",
+            "description": "Year filter",
+            "in": "query",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "nflTeam",
+            "description": "NFL team filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "college",
+            "description": "Player college filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "conference",
+            "description": "College confrence abbreviation filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "position",
+            "description": "NFL position filter",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DraftPick"
+              }
+            }
+          },
+          "400": {
+            "description": "error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Game": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "season_type": {
+          "type": "string"
+        },
+        "start_date": {
+          "type": "string"
+        },
+        "start_time_tbd": {
+          "type": "boolean"
+        },
+        "completed": {
+          "type": "boolean"
+        },
+        "neutral_site": {
+          "type": "boolean"
+        },
+        "conference_game": {
+          "type": "boolean"
+        },
+        "attendance": {
+          "type": "integer"
+        },
+        "venue_id": {
+          "type": "integer"
+        },
+        "venue": {
+          "type": "string"
+        },
+        "home_id": {
+          "type": "integer"
+        },
+        "home_team": {
+          "type": "string"
+        },
+        "home_conference": {
+          "type": "string"
+        },
+        "home_division": {
+          "type": "string"
+        },
+        "home_points": {
+          "type": "integer"
+        },
+        "home_line_scores": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "home_post_win_prob": {
+          "type": "number"
+        },
+        "home_pregame_elo": {
+          "type": "integer"
+        },
+        "home_postgame_elo": {
+          "type": "integer"
+        },
+        "away_id": {
+          "type": "integer"
+        },
+        "away_team": {
+          "type": "string"
+        },
+        "away_conference": {
+          "type": "string"
+        },
+        "away_division": {
+          "type": "string"
+        },
+        "away_points": {
+          "type": "integer"
+        },
+        "away_line_scores": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "away_post_win_prob": {
+          "type": "number"
+        },
+        "away_pregame_elo": {
+          "type": "integer"
+        },
+        "away_postgame_elo": {
+          "type": "integer"
+        },
+        "excitement_index": {
+          "type": "number"
+        },
+        "highlights": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "TeamRecord": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "teamId": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "division": {
+          "type": "string"
+        },
+        "expectedWins": {
+          "type": "number"
+        },
+        "total": {
+          "type": "object",
+          "properties": {
+            "games": {
+              "type": "integer"
+            },
+            "wins": {
+              "type": "integer"
+            },
+            "losses": {
+              "type": "integer"
+            },
+            "ties": {
+              "type": "integer"
+            }
+          }
+        },
+        "conferenceGames": {
+          "type": "object",
+          "properties": {
+            "games": {
+              "type": "integer"
+            },
+            "wins": {
+              "type": "integer"
+            },
+            "losses": {
+              "type": "integer"
+            },
+            "ties": {
+              "type": "integer"
+            }
+          }
+        },
+        "homeGames": {
+          "type": "object",
+          "properties": {
+            "games": {
+              "type": "integer"
+            },
+            "wins": {
+              "type": "integer"
+            },
+            "losses": {
+              "type": "integer"
+            },
+            "ties": {
+              "type": "integer"
+            }
+          }
+        },
+        "awayGames": {
+          "type": "object",
+          "properties": {
+            "games": {
+              "type": "integer"
+            },
+            "wins": {
+              "type": "integer"
+            },
+            "losses": {
+              "type": "integer"
+            },
+            "ties": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "GameMedia": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "isStartTimeTBD": {
+          "type": "boolean"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "homeConference": {
+          "type": "string"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "awayConference": {
+          "type": "string"
+        },
+        "mediaType": {
+          "type": "string"
+        },
+        "outlet": {
+          "type": "string"
+        }
+      }
+    },
+    "GameWeather": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "string"
+        },
+        "gameIndoors": {
+          "type": "boolean"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "homeConference": {
+          "type": "string"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "awayConference": {
+          "type": "string"
+        },
+        "venueId": {
+          "type": "integer"
+        },
+        "venue": {
+          "type": "string"
+        },
+        "temperature": {
+          "type": "number"
+        },
+        "dewPoint": {
+          "type": "number"
+        },
+        "humidity": {
+          "type": "number"
+        },
+        "precipitation": {
+          "type": "number"
+        },
+        "snowfall": {
+          "type": "number"
+        },
+        "windDirection": {
+          "type": "number"
+        },
+        "windSpeed": {
+          "type": "number"
+        },
+        "pressure": {
+          "type": "number"
+        },
+        "weatherConditionCode": {
+          "type": "integer"
+        },
+        "weatherCondition": {
+          "type": "string"
+        }
+      }
+    },
+    "PlayerGame": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "school": {
+                "type": "string"
+              },
+              "conference": {
+                "type": "string"
+              },
+              "homeAway": {
+                "type": "string"
+              },
+              "points": {
+                "type": "integer"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "types": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "athletes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "stat": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "TeamGame": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "schoolId": {
+                "type": "integer"
+              },
+              "school": {
+                "type": "string"
+              },
+              "conference": {
+                "type": "string"
+              },
+              "homeAway": {
+                "type": "string"
+              },
+              "points": {
+                "type": "integer"
+              },
+              "stats": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "category": {
+                      "type": "string"
+                    },
+                    "stat": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Drive": {
+      "type": "object",
+      "properties": {
+        "offense": {
+          "type": "string"
+        },
+        "offense_conference": {
+          "type": "string"
+        },
+        "defense": {
+          "type": "string"
+        },
+        "defense_conference": {
+          "type": "string"
+        },
+        "game_id": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "drive_number": {
+          "type": "integer"
+        },
+        "scoring": {
+          "type": "boolean"
+        },
+        "start_period": {
+          "type": "integer"
+        },
+        "start_yardline": {
+          "type": "integer"
+        },
+        "start_yards_to_goal": {
+          "type": "integer"
+        },
+        "start_time": {
+          "type": "object",
+          "properties": {
+            "minutes": {
+              "type": "integer"
+            },
+            "seconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "end_period": {
+          "type": "integer"
+        },
+        "end_yardline": {
+          "type": "integer"
+        },
+        "end_yards_to_goal": {
+          "type": "integer"
+        },
+        "end_time": {
+          "type": "object",
+          "properties": {
+            "minutes": {
+              "type": "integer"
+            },
+            "seconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "plays": {
+          "type": "integer"
+        },
+        "yards": {
+          "type": "integer"
+        },
+        "drive_result": {
+          "type": "string"
+        },
+        "is_home_offense": {
+          "type": "boolean"
+        },
+        "start_offense_score": {
+          "type": "integer"
+        },
+        "start_defense_score": {
+          "type": "integer"
+        },
+        "end_offense_score": {
+          "type": "integer"
+        },
+        "end_defense_score": {
+          "type": "integer"
+        }
+      }
+    },
+    "Play": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "drive_id": {
+          "type": "integer"
+        },
+        "game_id": {
+          "type": "integer"
+        },
+        "drive_number": {
+          "type": "integer"
+        },
+        "play_number": {
+          "type": "integer"
+        },
+        "offense": {
+          "type": "string"
+        },
+        "offense_conference": {
+          "type": "string"
+        },
+        "offense_score": {
+          "type": "integer"
+        },
+        "defense": {
+          "type": "string"
+        },
+        "home": {
+          "type": "string"
+        },
+        "away": {
+          "type": "string"
+        },
+        "defense_conference": {
+          "type": "string"
+        },
+        "defense_score": {
+          "type": "integer"
+        },
+        "period": {
+          "type": "integer"
+        },
+        "clock": {
+          "type": "object",
+          "properties": {
+            "minutes": {
+              "type": "integer"
+            },
+            "seconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "offense_timeouts": {
+          "type": "integer"
+        },
+        "defense_timeouts": {
+          "type": "integer"
+        },
+        "yard_line": {
+          "type": "integer"
+        },
+        "yards_to_goal": {
+          "type": "integer"
+        },
+        "down": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "yards_gained": {
+          "type": "integer"
+        },
+        "scoring": {
+          "type": "boolean"
+        },
+        "play_type": {
+          "type": "string"
+        },
+        "play_text": {
+          "type": "string"
+        },
+        "ppa": {
+          "type": "number"
+        },
+        "wallclock": {
+          "type": "string"
+        }
+      }
+    },
+    "PlayType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        }
+      }
+    },
+    "Conference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "short_name": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        }
+      }
+    },
+    "Team": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "school": {
+          "type": "string"
+        },
+        "mascot": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        },
+        "alt_name_1": {
+          "type": "string"
+        },
+        "alt_name_2": {
+          "type": "string"
+        },
+        "alt_name_3": {
+          "type": "string"
+        },
+        "classification": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "division": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "alt_color": {
+          "type": "string"
+        },
+        "logos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "twitter": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "venue_id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            },
+            "zip": {
+              "type": "string"
+            },
+            "country_code": {
+              "type": "string"
+            },
+            "timezone": {
+              "type": "string"
+            },
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            },
+            "elevation": {
+              "type": "number"
+            },
+            "capacity": {
+              "type": "number"
+            },
+            "year_constructed": {
+              "type": "number"
+            },
+            "grass": {
+              "type": "boolean"
+            },
+            "dome": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "Player": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "jersey": {
+          "type": "integer"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "position": {
+          "type": "string"
+        },
+        "home_city": {
+          "type": "string"
+        },
+        "home_state": {
+          "type": "string"
+        },
+        "home_country": {
+          "type": "string"
+        },
+        "home_latitude": {
+          "type": "number"
+        },
+        "home_longitude": {
+          "type": "number"
+        },
+        "home_county_fips": {
+          "type": "string"
+        },
+        "recruit_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "TeamTalent": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "school": {
+          "type": "string"
+        },
+        "talent": {
+          "type": "number"
+        }
+      }
+    },
+    "TeamSeason": {
+      "type": "object",
+      "properties": {
+        "school": {
+          "type": "string"
+        },
+        "year": {
+          "type": "string"
+        },
+        "games": {
+          "type": "integer"
+        },
+        "wins": {
+          "type": "integer"
+        },
+        "losses": {
+          "type": "integer"
+        },
+        "ties": {
+          "type": "integer"
+        },
+        "preseason_rank": {
+          "type": "integer",
+          "description": "Rank in the AP preseason poll"
+        },
+        "postseason_rank": {
+          "type": "integer",
+          "description": "Final ranking in the AP poll"
+        },
+        "srs": {
+          "type": "number",
+          "description": "Final SRS rankings"
+        },
+        "sp_overall": {
+          "type": "number",
+          "description": "Final overall SP+ rating"
+        },
+        "sp_offense": {
+          "type": "number",
+          "description": "Final SP+ offensive rating"
+        },
+        "sp_defense": {
+          "type": "number",
+          "description": "Final SP+ defensive rating"
+        }
+      }
+    },
+    "Venue": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer"
+        },
+        "grass": {
+          "type": "boolean"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "zip": {
+          "type": "string"
+        },
+        "country_code": {
+          "type": "string"
+        },
+        "location": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          }
+        },
+        "elevation": {
+          "type": "number"
+        },
+        "year_constructed": {
+          "type": "integer"
+        },
+        "dome": {
+          "type": "boolean"
+        },
+        "timezone": {
+          "type": "string"
+        }
+      }
+    },
+    "RankingWeek": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "polls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "poll": {
+                "type": "string"
+              },
+              "ranks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "rank": {
+                      "type": "integer"
+                    },
+                    "school": {
+                      "type": "string"
+                    },
+                    "conference": {
+                      "type": "string"
+                    },
+                    "firstPlaceVotes": {
+                      "type": "integer"
+                    },
+                    "points": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "TeamMatchup": {
+      "type": "object",
+      "properties": {
+        "team1": {
+          "type": "string"
+        },
+        "team2": {
+          "type": "string"
+        },
+        "startYear": {
+          "type": "integer"
+        },
+        "endYear": {
+          "type": "integer"
+        },
+        "team1Wins": {
+          "type": "integer"
+        },
+        "team2Wins": {
+          "type": "integer"
+        },
+        "ties": {
+          "type": "integer"
+        },
+        "games": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "season": {
+                "type": "integer"
+              },
+              "week": {
+                "type": "integer"
+              },
+              "season_type": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "neutralSite": {
+                "type": "boolean"
+              },
+              "venue": {
+                "type": "string"
+              },
+              "homeTeam": {
+                "type": "string"
+              },
+              "homeScore": {
+                "type": "integer"
+              },
+              "awayTeam": {
+                "type": "string"
+              },
+              "awayScore": {
+                "type": "integer"
+              },
+              "winner": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "GameLines": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "homeConference": {
+          "type": "string"
+        },
+        "homeScore": {
+          "type": "integer"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "awayConference": {
+          "type": "string"
+        },
+        "awayScore": {
+          "type": "integer"
+        },
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "provider": {
+                "type": "string"
+              },
+              "spread": {
+                "type": "number"
+              },
+              "formattedSpread": {
+                "type": "string"
+              },
+              "spreadOpen": {
+                "type": "number"
+              },
+              "overUnder": {
+                "type": "number"
+              },
+              "overUnderOpen": {
+                "type": "number"
+              },
+              "homeMoneyline": {
+                "type": "number"
+              },
+              "awayMoneyline": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Recruit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "athleteId": {
+          "type": "integer"
+        },
+        "recruitType": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "ranking": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "school": {
+          "type": "string"
+        },
+        "committedTo": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "height": {
+          "type": "number"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "stars": {
+          "type": "integer"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "city": {
+          "type": "string"
+        },
+        "stateProvince": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        },
+        "hometownInfo": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            },
+            "countyFips": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "TeamRecruitingRank": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "rank": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "points": {
+          "type": "number"
+        }
+      }
+    },
+    "PositionGroupRecruitingRating": {
+      "type": "object",
+      "properties": {
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "positionGroup": {
+          "type": "string"
+        },
+        "averageRating": {
+          "type": "number"
+        },
+        "totalRating": {
+          "type": "number"
+        },
+        "commits": {
+          "type": "number"
+        },
+        "averageStars": {
+          "type": "number"
+        }
+      }
+    },
+    "TeamSRSRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "division": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "ranking": {
+          "type": "number"
+        }
+      }
+    },
+    "TeamEloRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "elo": {
+          "type": "number"
+        }
+      }
+    },
+    "TeamFPIRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "fpi": {
+          "type": "number"
+        },
+        "resumeRanks": {
+          "type": "object",
+          "properties": {
+            "strengthOfRecord": {
+              "type": "integer"
+            },
+            "fpi": {
+              "type": "integer"
+            },
+            "averageWinProbability": {
+              "type": "integer"
+            },
+            "strengthOfSchedule": {
+              "type": "integer"
+            },
+            "remainingStrengthOfSchedule": {
+              "type": "integer"
+            },
+            "gameControl": {
+              "type": "integer"
+            }
+          }
+        },
+        "efficiencies": {
+          "type": "object",
+          "properties": {
+            "overall": {
+              "type": "number"
+            },
+            "offense": {
+              "type": "number"
+            },
+            "defense": {
+              "type": "number"
+            },
+            "specialTeams": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "TeamSPRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "ranking": {
+          "type": "number"
+        },
+        "secondOrderWins": {
+          "type": "number"
+        },
+        "sos": {
+          "type": "number"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "ranking": {
+              "type": "number"
+            },
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "runRate": {
+              "type": "number"
+            },
+            "pace": {
+              "type": "number"
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "ranking": {
+              "type": "number"
+            },
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "pasing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "havoc": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "frontSeven": {
+                  "type": "number"
+                },
+                "db": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "specialTeams": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "ConferenceSPRating": {
+      "type": "object",
+      "properties": {
+        "year": {
+          "type": "integer"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "secondOrderWins": {
+          "type": "number"
+        },
+        "sos": {
+          "type": "number"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "runRate": {
+              "type": "number"
+            },
+            "pace": {
+              "type": "number"
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            },
+            "success": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "pasing": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            },
+            "havoc": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "frontSeven": {
+                  "type": "number"
+                },
+                "db": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "specialTeams": {
+          "type": "object",
+          "properties": {
+            "rating": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "PredictedPoints": {
+      "type": "object",
+      "properties": {
+        "yardLine": {
+          "type": "integer"
+        },
+        "predictedPoints": {
+          "type": "number"
+        }
+      }
+    },
+    "FieldGoalExpectedPoints": {
+      "type": "object",
+      "properties": {
+        "yardsToGoal": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "expectedPoints": {
+          "type": "number"
+        }
+      }
+    },
+    "TeamSeasonStat": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "statName": {
+          "type": "string"
+        },
+        "statValue": {
+          "type": "integer"
+        }
+      }
+    },
+    "TeamPPA": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "overall": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            },
+            "cumulative": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "passing": {
+                  "type": "number"
+                },
+                "rushing": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "overall": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            },
+            "cumulative": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "passing": {
+                  "type": "number"
+                },
+                "rushing": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "GamePPA": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "overall": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "overall": {
+              "type": "number"
+            },
+            "passing": {
+              "type": "number"
+            },
+            "rushing": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "PlayWP": {
+      "type": "object",
+      "properties": {
+        "gamesId": {
+          "type": "integer"
+        },
+        "playId": {
+          "type": "integer"
+        },
+        "playText": {
+          "type": "string"
+        },
+        "homeId": {
+          "type": "integer"
+        },
+        "home": {
+          "type": "string"
+        },
+        "awayId": {
+          "type": "integer"
+        },
+        "away": {
+          "type": "string"
+        },
+        "spread": {
+          "type": "number"
+        },
+        "homeBall": {
+          "type": "boolean"
+        },
+        "homeScore": {
+          "type": "integer"
+        },
+        "awayScore": {
+          "type": "integer"
+        },
+        "timeRemaining": {
+          "type": "integer"
+        },
+        "yardLine": {
+          "type": "integer"
+        },
+        "down": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "homeWinProb": {
+          "type": "number"
+        },
+        "playNumber": {
+          "type": "integer"
+        }
+      }
+    },
+    "PregameWP": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "gameId": {
+          "type": "integer"
+        },
+        "homeTeam": {
+          "type": "string"
+        },
+        "awayTeam": {
+          "type": "string"
+        },
+        "spread": {
+          "type": "number"
+        },
+        "homeWinProb": {
+          "type": "number"
+        }
+      }
+    },
+    "PlayStatType": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "PlayStat": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "teamScore": {
+          "type": "integer"
+        },
+        "opponentScore": {
+          "type": "integer"
+        },
+        "driveId": {
+          "type": "integer"
+        },
+        "playId": {
+          "type": "integer"
+        },
+        "period": {
+          "type": "integer"
+        },
+        "clock": {
+          "type": "object",
+          "properties": {
+            "minutes": {
+              "type": "integer"
+            },
+            "seconds": {
+              "type": "integer"
+            }
+          }
+        },
+        "yardsToGoal": {
+          "type": "integer"
+        },
+        "down": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "athleteId": {
+          "type": "integer"
+        },
+        "athleteName": {
+          "type": "string"
+        },
+        "statType": {
+          "type": "string"
+        },
+        "stat": {
+          "type": "integer"
+        }
+      }
+    },
+    "AdvancedSeasonStat": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "plays": {
+              "type": "integer"
+            },
+            "drives": {
+              "type": "integer"
+            },
+            "ppa": {
+              "type": "number"
+            },
+            "totalPPA": {
+              "type": "number"
+            },
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "lineYards": {
+              "type": "number"
+            },
+            "lineYardsTotal": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "secondLevelYardsTotal": {
+              "type": "integer"
+            },
+            "openFieldYards": {
+              "type": "number"
+            },
+            "openFieldYardsTotal": {
+              "type": "integer"
+            },
+            "totalOpportunies": {
+              "type": "integer"
+            },
+            "pointsPerOpportunity": {
+              "type": "number"
+            },
+            "fieldPosition": {
+              "type": "object",
+              "properties": {
+                "averageStart": {
+                  "type": "number"
+                },
+                "averagePredictedPoints": {
+                  "type": "number"
+                }
+              }
+            },
+            "havoc": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "frontSeven": {
+                  "type": "number"
+                },
+                "db": {
+                  "type": "number"
+                }
+              }
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "rushingPlays": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingPlays": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "plays": {
+              "type": "integer"
+            },
+            "drives": {
+              "type": "integer"
+            },
+            "ppa": {
+              "type": "number"
+            },
+            "totalPPA": {
+              "type": "number"
+            },
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "lineYards": {
+              "type": "number"
+            },
+            "lineYardsTotal": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "secondLevelYardsTotal": {
+              "type": "integer"
+            },
+            "openFieldYards": {
+              "type": "number"
+            },
+            "openFieldYardsTotal": {
+              "type": "integer"
+            },
+            "totalOpportunies": {
+              "type": "integer"
+            },
+            "pointsPerOpportunity": {
+              "type": "number"
+            },
+            "fieldPosition": {
+              "type": "object",
+              "properties": {
+                "averageStart": {
+                  "type": "number"
+                },
+                "averagePredictedPoints": {
+                  "type": "number"
+                }
+              }
+            },
+            "havoc": {
+              "type": "object",
+              "properties": {
+                "total": {
+                  "type": "number"
+                },
+                "frontSeven": {
+                  "type": "number"
+                },
+                "db": {
+                  "type": "number"
+                }
+              }
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "rushingPlays": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingPlays": {
+              "type": "object",
+              "properties": {
+                "rate": {
+                  "type": "number"
+                },
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "AdvancedGameStat": {
+      "type": "object",
+      "properties": {
+        "gameId": {
+          "type": "integer"
+        },
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "offense": {
+          "type": "object",
+          "properties": {
+            "plays": {
+              "type": "integer"
+            },
+            "drives": {
+              "type": "integer"
+            },
+            "ppa": {
+              "type": "number"
+            },
+            "totalPPA": {
+              "type": "number"
+            },
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "lineYards": {
+              "type": "number"
+            },
+            "lineYardsTotal": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "secondLevelYardsTotal": {
+              "type": "integer"
+            },
+            "openFieldYards": {
+              "type": "number"
+            },
+            "openFieldYardsTotal": {
+              "type": "integer"
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "rushingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "defense": {
+          "type": "object",
+          "properties": {
+            "plays": {
+              "type": "integer"
+            },
+            "drives": {
+              "type": "integer"
+            },
+            "ppa": {
+              "type": "number"
+            },
+            "totalPPA": {
+              "type": "number"
+            },
+            "successRate": {
+              "type": "number"
+            },
+            "explosiveness": {
+              "type": "number"
+            },
+            "powerSuccess": {
+              "type": "number"
+            },
+            "stuffRate": {
+              "type": "number"
+            },
+            "lineYards": {
+              "type": "number"
+            },
+            "lineYardsTotal": {
+              "type": "number"
+            },
+            "secondLevelYards": {
+              "type": "number"
+            },
+            "secondLevelYardsTotal": {
+              "type": "integer"
+            },
+            "openFieldYards": {
+              "type": "number"
+            },
+            "openFieldYardsTotal": {
+              "type": "integer"
+            },
+            "standardDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingDowns": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "rushingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            },
+            "passingPlays": {
+              "type": "object",
+              "properties": {
+                "ppa": {
+                  "type": "number"
+                },
+                "totalPPA": {
+                  "type": "number"
+                },
+                "successRate": {
+                  "type": "number"
+                },
+                "explosiveness": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "PlayerSearchResult": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "jersey": {
+          "type": "integer"
+        },
+        "position": {
+          "type": "string"
+        },
+        "hometown": {
+          "type": "string"
+        },
+        "teamColor": {
+          "type": "string"
+        },
+        "teamColorSecondary": {
+          "type": "string"
+        }
+      }
+    },
+    "PlayerGamePPA": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "opponent": {
+          "type": "string"
+        },
+        "averagePPA": {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "number"
+            },
+            "pass": {
+              "type": "number"
+            },
+            "rush": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "PlayerSeasonPPA": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "averagePPA": {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "number"
+            },
+            "pass": {
+              "type": "number"
+            },
+            "rush": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            }
+          }
+        },
+        "totalPPA": {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "number"
+            },
+            "pass": {
+              "type": "number"
+            },
+            "rush": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "PlayerUsage": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "overall": {
+              "type": "number"
+            },
+            "pass": {
+              "type": "number"
+            },
+            "rush": {
+              "type": "number"
+            },
+            "firstDown": {
+              "type": "number"
+            },
+            "secondDown": {
+              "type": "number"
+            },
+            "thirdDown": {
+              "type": "number"
+            },
+            "standardDowns": {
+              "type": "number"
+            },
+            "passingDowns": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "ReturningProduction": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "totalPPA": {
+          "type": "number"
+        },
+        "totalPassingPPA": {
+          "type": "number"
+        },
+        "totalReceivingPPA": {
+          "type": "number"
+        },
+        "totalRushingPPA": {
+          "type": "number"
+        },
+        "percentPPA": {
+          "type": "number"
+        },
+        "percentPassingPPA": {
+          "type": "number"
+        },
+        "percentReceivingPPA": {
+          "type": "number"
+        },
+        "percentRushingPPA": {
+          "type": "number"
+        },
+        "usage": {
+          "type": "number"
+        },
+        "passingUsage": {
+          "type": "number"
+        },
+        "receivingUsage": {
+          "type": "number"
+        },
+        "rushingUsage": {
+          "type": "number"
+        }
+      }
+    },
+    "BoxScore": {
+      "type": "object",
+      "properties": {
+        "teams": {
+          "type": "object",
+          "properties": {
+            "ppa": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "plays": {
+                    "type": "number"
+                  },
+                  "overall": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "passing": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "rushing": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "cumulativePpa": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "plays": {
+                    "type": "number"
+                  },
+                  "overall": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "passing": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "rushing": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "successRates": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "overall": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "standardDowns": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "passingDowns": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "explosiveness": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "overall": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "rushing": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "powerSuccess": {
+                    "type": "number"
+                  },
+                  "stuffRate": {
+                    "type": "number"
+                  },
+                  "lineYards": {
+                    "type": "number"
+                  },
+                  "lineYardsAverage": {
+                    "type": "number"
+                  },
+                  "secondLevelYards": {
+                    "type": "integer"
+                  },
+                  "secondLevelYardsAverage": {
+                    "type": "number"
+                  },
+                  "openFieldYards": {
+                    "type": "integer"
+                  },
+                  "openFieldYardsAverage": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "havoc": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "total": {
+                    "type": "number"
+                  },
+                  "frontSeven": {
+                    "type": "number"
+                  },
+                  "db": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "scoringOpportunities": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "opportunities": {
+                    "type": "integer"
+                  },
+                  "points": {
+                    "type": "integer"
+                  },
+                  "pointsPerOpportunity": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "fieldPosition": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "team": {
+                    "type": "string"
+                  },
+                  "averageStart": {
+                    "type": "number"
+                  },
+                  "averageStartingPredictedPoints": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "players": {
+          "type": "object",
+          "properties": {
+            "usage": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "player": {
+                    "type": "string"
+                  },
+                  "team": {
+                    "type": "string"
+                  },
+                  "position": {
+                    "type": "string"
+                  },
+                  "total": {
+                    "type": "number"
+                  },
+                  "quarter1": {
+                    "type": "number"
+                  },
+                  "quarter2": {
+                    "type": "number"
+                  },
+                  "quarter3": {
+                    "type": "number"
+                  },
+                  "quarter4": {
+                    "type": "number"
+                  },
+                  "rushing": {
+                    "type": "number"
+                  },
+                  "passing": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "ppa": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "player": {
+                    "type": "string"
+                  },
+                  "team": {
+                    "type": "string"
+                  },
+                  "position": {
+                    "type": "string"
+                  },
+                  "average": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      },
+                      "rushing": {
+                        "type": "number"
+                      },
+                      "passing": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "cumulative": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "quarter1": {
+                        "type": "number"
+                      },
+                      "quarter2": {
+                        "type": "number"
+                      },
+                      "quarter3": {
+                        "type": "number"
+                      },
+                      "quarter4": {
+                        "type": "number"
+                      },
+                      "rushing": {
+                        "type": "number"
+                      },
+                      "passing": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "PlayerSeasonStat": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "playerId": {
+          "type": "integer"
+        },
+        "player": {
+          "type": "string"
+        },
+        "team": {
+          "type": "string"
+        },
+        "conference": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "statType": {
+          "type": "string"
+        },
+        "stat": {
+          "type": "number"
+        }
+      }
+    },
+    "Week": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "week": {
+          "type": "integer"
+        },
+        "seasonType": {
+          "type": "string"
+        },
+        "firstGameStart": {
+          "type": "string"
+        },
+        "lastGameStart": {
+          "type": "string"
+        }
+      }
+    },
+    "Coach": {
+      "type": "object",
+      "properties": {
+        "first_name": {
+          "type": "string"
+        },
+        "last_name": {
+          "type": "string"
+        },
+        "hire_date": {
+          "type": "string"
+        },
+        "seasons": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "school": {
+                "type": "string"
+              },
+              "year": {
+                "type": "string"
+              },
+              "games": {
+                "type": "integer"
+              },
+              "wins": {
+                "type": "integer"
+              },
+              "losses": {
+                "type": "integer"
+              },
+              "ties": {
+                "type": "integer"
+              },
+              "preseason_rank": {
+                "type": "integer",
+                "description": "Rank in the AP preseason poll"
+              },
+              "postseason_rank": {
+                "type": "integer",
+                "description": "Final ranking in the AP poll"
+              },
+              "srs": {
+                "type": "number",
+                "description": "Final SRS rankings"
+              },
+              "sp_overall": {
+                "type": "number",
+                "description": "Final overall SP+ rating"
+              },
+              "sp_offense": {
+                "type": "number",
+                "description": "Final SP+ offensive rating"
+              },
+              "sp_defense": {
+                "type": "number",
+                "description": "Final SP+ defensive rating"
+              }
+            }
+          }
+        }
+      }
+    },
+    "DraftTeam": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        }
+      }
+    },
+    "DraftPosition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "abbreviation": {
+          "type": "string"
+        }
+      }
+    },
+    "DraftPick": {
+      "type": "object",
+      "properties": {
+        "collegeAthleteId": {
+          "type": "integer"
+        },
+        "nflAthleteId": {
+          "type": "integer"
+        },
+        "collegeId": {
+          "type": "integer"
+        },
+        "collegeTeam": {
+          "type": "string"
+        },
+        "collegeConference": {
+          "type": "string"
+        },
+        "nflTeam": {
+          "type": "string"
+        },
+        "year": {
+          "type": "integer"
+        },
+        "overall": {
+          "type": "integer"
+        },
+        "round": {
+          "type": "integer"
+        },
+        "pick": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "height": {
+          "type": "integer"
+        },
+        "weight": {
+          "type": "integer"
+        },
+        "preDraftRanking": {
+          "type": "integer"
+        },
+        "preDraftPositionRanking": {
+          "type": "integer"
+        },
+        "preDraftGrade": {
+          "type": "integer"
+        },
+        "hometownInfo": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string"
+            },
+            "latitude": {
+              "type": "number"
+            },
+            "longitude": {
+              "type": "number"
+            },
+            "countryFips": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "ScoreboardGame": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "startTimeTBD": {
+          "type": "boolean"
+        },
+        "tv": {
+          "type": "string"
+        },
+        "neutralSite": {
+          "type": "boolean"
+        },
+        "conferenceGame": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "period": {
+          "type": "integer"
+        },
+        "clock": {
+          "type": "string"
+        },
+        "situation": {
+          "type": "string"
+        },
+        "possession": {
+          "type": "string"
+        },
+        "venue": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "state": {
+              "type": "string"
+            }
+          }
+        },
+        "homeTeam": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "conference": {
+              "type": "string"
+            },
+            "classification": {
+              "type": "string"
+            },
+            "points": {
+              "type": "integer"
+            }
+          }
+        },
+        "awayTeam": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "conference": {
+              "type": "string"
+            },
+            "classification": {
+              "type": "string"
+            },
+            "points": {
+              "type": "integer"
+            }
+          }
+        },
+        "weather": {
+          "type": "object",
+          "properties": {
+            "temperature": {
+              "type": "number"
+            },
+            "description": {
+              "type": "string"
+            },
+            "windSpeed": {
+              "type": "number"
+            },
+            "windDirection": {
+              "type": "number"
+            }
+          }
+        },
+        "betting": {
+          "type": "object",
+          "properties": {
+            "spread": {
+              "type": "number"
+            },
+            "overUnder": {
+              "type": "number"
+            },
+            "homeMoneyline": {
+              "type": "integer"
+            },
+            "awayMoneyline": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "LivePlayByPlay": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        },
+        "period": {
+          "type": "integer"
+        },
+        "clock": {
+          "type": "string"
+        },
+        "possession": {
+          "type": "string"
+        },
+        "down": {
+          "type": "integer"
+        },
+        "distance": {
+          "type": "integer"
+        },
+        "yardsToGoal": {
+          "type": "integer"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "teamId": {
+                "type": "integer"
+              },
+              "team": {
+                "type": "string"
+              },
+              "homeAway": {
+                "type": "string"
+              },
+              "points": {
+                "type": "integer"
+              },
+              "drives": {
+                "type": "integer"
+              },
+              "scoringOpportunities": {
+                "type": "integer"
+              },
+              "pointsPerOpportunity": {
+                "type": "number"
+              },
+              "plays": {
+                "type": "integer"
+              },
+              "lineYards": {
+                "type": "integer"
+              },
+              "lineYardsPerRush": {
+                "type": "number"
+              },
+              "secondLevelYards": {
+                "type": "integer"
+              },
+              "secondLevelYardsPerRush": {
+                "type": "number"
+              },
+              "openFieldYards": {
+                "type": "integer"
+              },
+              "openFieldYardsPerRush": {
+                "type": "number"
+              },
+              "epaPerPlay": {
+                "type": "number"
+              },
+              "totalEpa": {
+                "type": "number"
+              },
+              "passingEpa": {
+                "type": "number"
+              },
+              "epaPerPass": {
+                "type": "number"
+              },
+              "rushingEpa": {
+                "type": "number"
+              },
+              "epaPerRush": {
+                "type": "number"
+              },
+              "successRate": {
+                "type": "number"
+              },
+              "standardDownSuccessRate": {
+                "type": "number"
+              },
+              "passingDownSuccessRate": {
+                "type": "number"
+              },
+              "explosiveness": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "drives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "offenseId": {
+                "type": "integer"
+              },
+              "offense": {
+                "type": "string"
+              },
+              "defenseId": {
+                "type": "integer"
+              },
+              "defense": {
+                "type": "string"
+              },
+              "playCount": {
+                "type": "integer"
+              },
+              "yards": {
+                "type": "integer"
+              },
+              "startPeriod": {
+                "type": "integer"
+              },
+              "startClock": {
+                "type": "string"
+              },
+              "startYardsToGoal": {
+                "type": "integer"
+              },
+              "endPeriod": {
+                "type": "integer"
+              },
+              "endClock": {
+                "type": "string"
+              },
+              "endYardsToGoal": {
+                "type": "integer"
+              },
+              "duration": {
+                "type": "string"
+              },
+              "scoringOpportunity": {
+                "type": "boolean"
+              },
+              "plays": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "homeScore": {
+                      "type": "integer"
+                    },
+                    "awayScore": {
+                      "type": "integer"
+                    },
+                    "period": {
+                      "type": "integer"
+                    },
+                    "clock": {
+                      "type": "string"
+                    },
+                    "wallclock": {
+                      "type": "string"
+                    },
+                    "teamId": {
+                      "type": "integer"
+                    },
+                    "team": {
+                      "type": "string"
+                    },
+                    "down": {
+                      "type": "integer"
+                    },
+                    "distance": {
+                      "type": "integer"
+                    },
+                    "yardsToGoal": {
+                      "type": "integer"
+                    },
+                    "yardsGained": {
+                      "type": "integer"
+                    },
+                    "playTypeId": {
+                      "type": "integer"
+                    },
+                    "playType": {
+                      "type": "string"
+                    },
+                    "epa": {
+                      "type": "number"
+                    },
+                    "garbageTime": {
+                      "type": "boolean"
+                    },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "rushPass": {
+                      "type": "string"
+                    },
+                    "downType": {
+                      "type": "string"
+                    },
+                    "playText": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "PortalPlayer": {
+      "type": "object",
+      "properties": {
+        "season": {
+          "type": "integer"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "position": {
+          "type": "string"
+        },
+        "origin": {
+          "type": "string"
+        },
+        "destination": {
+          "type": "string"
+        },
+        "transferDate": {
+          "type": "string"
+        },
+        "rating": {
+          "type": "number"
+        },
+        "stars": {
+          "type": "integer"
+        },
+        "eligibility": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
