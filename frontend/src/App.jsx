@@ -15,7 +15,7 @@ export default function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const urlYear = params.get('year');
-    const urlTeam = params.get('team');
+    const urlTeam = params.get('teamId');
     
     if (urlYear) {
       setYear(parseInt(urlYear, 10));
@@ -60,63 +60,45 @@ export default function App() {
     loadTeams();
   }, []);
 
-  const handleOpponentClick = async (opponentTeamName) => {
+  // New: handle clicks by teamId (no name matching)
+  const handleOpponentClick = async (opponentTeamId) => {
     try {
-      console.log('handleOpponentClick start', { opponentTeamName });
-      // Normalize clicked name: remove leading '@', 'vs', 'vs.' any leading '#N' rank, and parenthesized vote counts, then trim
-      let cleanName = (opponentTeamName || '').replace(/@/g, '').trim();
-      cleanName = cleanName.replace(/^vs\.?\s+/i, '');
-      cleanName = cleanName.replace(/^#?\d+(\s*\/\s*#?\d+)?\s+/, '').trim();
-      // remove parenthesized numbers like "(25)" that represent first-place votes
-      cleanName = cleanName.replace(/\(\s*\d+\s*\)/g, '').trim();
-
-      const normalize = (s) => String(s || '').toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
-      const target = normalize(cleanName);
-
-      // Find the opponent team ID from teams array: exact then fuzzy
-      let opponentTeam = teams.find(t => {
-        const teamName = normalize(t.name || t.Name || t.school || t.Alias || '');
-        return teamName === target;
-      });
-      if (!opponentTeam) {
-        opponentTeam = teams.find(t => {
-          const teamName = normalize(t.name || t.Name || t.school || t.Alias || '');
-          return teamName.includes(target) || target.includes(teamName);
-        });
-      }
-
-      if (!opponentTeam) {
-        console.warn('Opponent team not found for', cleanName);
-        return;
-      }
-
-      const teamIdVal = opponentTeam.id ?? opponentTeam.ID ?? '';
-      console.log('opponentTeam resolved', { opponentTeam, teamIdVal });
-      const teamIdStr = String(teamIdVal);
+      console.log('handleOpponentClick by id', { opponentTeamId });
+      if (!opponentTeamId) return;
+      const teamIdStr = String(opponentTeamId);
       setSelectedTeam(teamIdStr);
 
-      // Update URL bar with new team
+      // Update URL
       const params = new URLSearchParams();
       params.set('year', year);
-      params.set('team', teamIdStr);
+      params.set('teamId', teamIdStr);
       window.history.replaceState({}, '', `?${params.toString()}`);
 
-      // Load games for the new team
+      // Load games for the new team (query by team name from teams list)
       setLoading(true);
       setError('');
       try {
-        let url = `/api/games?year=${year}`;
-        const newTeamName = opponentTeam.name || opponentTeam.Name || opponentTeam.school || opponentTeam.Alias || '';
-        url += `&team=${encodeURIComponent(newTeamName.toLowerCase())}`;
-        console.log('GET', url);
-        const res = await fetch(url);
+        const teamObj = teams.find(t => String(t.id || t.ID) === teamIdStr);
+        let res;
+        if (teamObj) {
+          const teamNameParam = encodeURIComponent(String((teamObj.name || teamObj.Name || teamObj.school || teamObj.Alias) || '').toLowerCase());
+          const url = `/api/games?year=${year}&team=${teamNameParam}`;
+          console.log('GET', url);
+          res = await fetch(url);
+        } else {
+          // Team name not available locally; fall back to year-only query (no team filter)
+          const url = `/api/games?year=${year}`;
+          console.warn('Team name not found locally; loading all games for year', { year, teamId: teamIdStr });
+          console.log('GET', url);
+          res = await fetch(url);
+        }
         if (!res.ok) throw new Error('Failed to load games');
         const data = await res.json();
         const gamesList = Array.isArray(data) ? data : [];
         gamesList.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
         setGames(gamesList);
       } catch (e) {
-        setError('Error loading games: ' + e.message);
+        setError('Error loading games: ' + (e && e.message ? e.message : String(e)));
       } finally {
         setLoading(false);
       }
@@ -132,11 +114,20 @@ export default function App() {
     try {
       let url = `/api/games?year=${year}`;
       if (selectedTeam) {
-        // Find the team name from teams array
-        const team = teams.find(t => (t.id || t.ID) == selectedTeam);
-        if (team) {
-          const teamName = team.name || team.Name || team.school || team.Alias;
-          url += `&team=${encodeURIComponent(teamName.toLowerCase())}`;
+        // If selectedTeam is an id, prefer querying by id; fall back to name if id not available
+        const maybeId = Number(selectedTeam);
+        if (!isNaN(maybeId) && maybeId > 0) {
+          const teamObj = teams.find(t => String(t.id || t.ID) === String(selectedTeam));
+          if (teamObj) {
+            const teamNameParam = encodeURIComponent(String((teamObj.name || teamObj.Name || teamObj.school || teamObj.Alias) || '').toLowerCase());
+            url += `&team=${teamNameParam}`;
+          }
+        } else {
+          const team = teams.find(t => (t.id || t.ID) == selectedTeam);
+          if (team) {
+            const teamName = team.name || team.Name || team.school || team.Alias;
+            url += `&team=${encodeURIComponent(teamName.toLowerCase())}`;
+          }
         }
       }
       console.log('GET', url);
@@ -164,7 +155,7 @@ export default function App() {
       const params = new URLSearchParams();
       params.set('year', year);
       if (selectedTeam) {
-        params.set('team', selectedTeam);
+        params.set('teamId', selectedTeam);
       }
       window.history.replaceState({}, '', `?${params.toString()}`);
     } catch (e) {
@@ -180,12 +171,13 @@ export default function App() {
     const team = teams.find(t => (t.id || t.ID) == selectedTeam);
     if (!team) return '';
 
-    const teamName = (team.name || team.Name || team.school || team.Alias || '').toLowerCase();
-    const homeTeamName = (game.homeTeam || '').toLowerCase();
-    const awayTeamName = (game.awayTeam || '').toLowerCase();
+    const teamIdStr = String(selectedTeam);
+    // Prefer the explicit `homeId` / `awayId` fields, fall back to other variants
+    const homeId = String(game.homeId ?? game.homeTeamId ?? game.home_tid ?? '');
+    const awayId = String(game.awayId ?? game.awayTeamId ?? game.away_tid ?? '');
 
-    const teamIsHome = homeTeamName.includes(teamName) || teamName.includes(homeTeamName);
-    const teamIsAway = awayTeamName.includes(teamName) || teamName.includes(awayTeamName);
+    const teamIsHome = homeId && homeId === teamIdStr;
+    const teamIsAway = awayId && awayId === teamIdStr;
 
     if (!teamIsHome && !teamIsAway) return '';
 
@@ -200,11 +192,11 @@ export default function App() {
     if (!selectedTeam) return {};
     const team = teams.find(t => (t.id || t.ID) == selectedTeam);
     if (!team) return {};
-    const teamName = (team.name || team.Name || team.school || team.Alias || '').toLowerCase();
-    const homeTeamName = (game.homeTeam || '').toLowerCase();
-    const awayTeamName = (game.awayTeam || '').toLowerCase();
-    const teamIsHome = homeTeamName.includes(teamName) || teamName.includes(homeTeamName);
-    const teamIsAway = awayTeamName.includes(teamName) || teamName.includes(awayTeamName);
+    const teamIdStr = String(selectedTeam);
+    const homeId = String(game.homeId ?? game.homeTeamId ?? game.home_tid ?? '');
+    const awayId = String(game.awayId ?? game.awayTeamId ?? game.away_tid ?? '');
+    const teamIsHome = homeId && homeId === teamIdStr;
+    const teamIsAway = awayId && awayId === teamIdStr;
     if (!teamIsHome && !teamIsAway) return {};
     const homePoints = game.homePoints ?? 0;
     const awayPoints = game.awayPoints ?? 0;
@@ -272,12 +264,12 @@ export default function App() {
       if (selectedTeam) {
         const team = teams.find(t => (t.id || t.ID) == selectedTeam);
         if (team) {
-          const teamName = (team.name || team.Name || team.school || team.Alias || '').toLowerCase();
-          const homeTeamName = (game.homeTeam || '').toLowerCase();
-          const awayTeamName = (game.awayTeam || '').toLowerCase();
-          const teamIsHome = homeTeamName.includes(teamName) || teamName.includes(homeTeamName);
-          const teamIsAway = awayTeamName.includes(teamName) || teamName.includes(awayTeamName);
-          
+          const teamIdStr = String(selectedTeam);
+          const homeId = String(game.homeTeamId ?? game.homeId ?? game.home_tid ?? '');
+          const awayId = String(game.awayTeamId ?? game.awayId ?? game.away_tid ?? '');
+          const teamIsHome = homeId && homeId === teamIdStr;
+          const teamIsAway = awayId && awayId === teamIdStr;
+
           if (teamIsHome) {
             totalFor += game.homePoints ?? 0;
             totalAgainst += game.awayPoints ?? 0;
@@ -305,7 +297,7 @@ export default function App() {
     return 'date-evening';
   };
 
-  const normalizeName = (s) => String(s || '').toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+  // name normalization removed — opponent resolution uses team IDs only
 
   // Now requires `teamId` (number or string) and `seasonType` to disambiguate regular vs postseason
   const getRankForTeamWeek = (week, teamId, seasonType = 'regular') => {
@@ -405,7 +397,7 @@ export default function App() {
 
   return (
     <Container className="mt-5">
-      <Row className="mb-4">
+      <Row className="">
         <Col md={8}>
           <h2>College Football Season</h2>
         </Col>
@@ -459,15 +451,15 @@ export default function App() {
               let wins = 0, losses = 0;
               const team = teams.find(t => (t.id || t.ID) == selectedTeam);
               const teamName = team ? (team.name || team.Name || team.school || team.Alias || '') : 'Team';
-              
+
               games.forEach(game => {
                 if (team) {
-                  const tName = (team.name || team.Name || team.school || team.Alias || '').toLowerCase();
-                  const homeTeamName = (game.homeTeam || '').toLowerCase();
-                  const awayTeamName = (game.awayTeam || '').toLowerCase();
-                  const teamIsHome = homeTeamName.includes(tName) || tName.includes(homeTeamName);
-                  const teamIsAway = awayTeamName.includes(tName) || tName.includes(awayTeamName);
-                  
+                  const teamIdStr = String(selectedTeam);
+                  const homeId = String(game.homeId ?? game.homeTeamId ?? game.home_tid ?? '');
+                  const awayId = String(game.awayId ?? game.awayTeamId ?? game.away_tid ?? '');
+                  const teamIsHome = homeId && homeId === teamIdStr;
+                  const teamIsAway = awayId && awayId === teamIdStr;
+
                   if (teamIsHome) {
                     if ((game.homePoints ?? 0) > (game.awayPoints ?? 0)) wins++;
                     else if ((game.homePoints ?? 0) < (game.awayPoints ?? 0)) losses++;
@@ -494,6 +486,7 @@ export default function App() {
                     <th>Score</th>
                     <th>Delta</th>
                     <th>Pos</th>
+                    <th>Conference</th>
                     <th>Venue</th>
                   </tr>
                 </thead>
@@ -503,11 +496,13 @@ export default function App() {
                     let prevWeekNum = null;
                     games.forEach((game, idx) => {
                       const team = teams.find(t => (t.id || t.ID) == selectedTeam);
-                      const teamName = team ? (team.name || team.Name || team.school || team.Alias || '').toLowerCase() : '';
-                      const homeTeamName = (game.homeTeam || '').toLowerCase();
-                      const awayTeamName = (game.awayTeam || '').toLowerCase();
-                      const teamIsHome = homeTeamName.includes(teamName) || teamName.includes(homeTeamName);
-                      const teamIsAway = awayTeamName.includes(teamName) || teamName.includes(awayTeamName);
+                      const teamIdVal = team ? (team.id ?? team.ID) : null;
+                      const teamIdStr = teamIdVal ? String(teamIdVal) : '';
+                      const homeId = String(game.homeTeamId ?? game.homeId ?? game.home_tid ?? '');
+                      const awayId = String(game.awayTeamId ?? game.awayId ?? game.away_tid ?? '');
+                      const teamIsHome = homeId && teamIdStr && homeId === teamIdStr;
+                      const teamIsAway = awayId && teamIdStr && awayId === teamIdStr;
+                      let rowOppId = null;
 
                       // Determine numeric week if available
                       const weekVal = game.week;
@@ -538,12 +533,12 @@ export default function App() {
 
                       if (teamIsHome) {
                         const oppRaw = game.awayTeam || '';
-                        // try find opponent team id
-                        const oppTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(oppRaw));
-                        const oppId = oppTeamObj ? (oppTeamObj.id ?? oppTeamObj.ID) : null;
+                        // Use opponent id fields if provided on the game object
+                        rowOppId = (game.awayId ?? game.awayTeamId ?? game.away_tid) ?? null;
+                        // Prefer committee rank for postseason rows, regular-season ranks for in-season
                         const oppRank = game && String(game.seasonType).toLowerCase() === 'postseason'
-                          ? getCommitteeRankForTeamWeek(game.week, oppId)
-                          : getRankForTeamWeek(game.week, oppId, 'regular');
+                          ? getCommitteeRankForTeamWeek(game.week, rowOppId)
+                          : getRankForTeamWeek(game.week, rowOppId, 'regular');
                         const rankText = oppRank ? `${formatRankForDisplay(oppRank)} ` : '';
                         const rankSpan = renderRankSpan(oppRank);
                         if (game.neutralSite) {
@@ -557,11 +552,10 @@ export default function App() {
                         opponentScore = game.awayPoints ?? '-';
                       } else if (teamIsAway) {
                         const oppRaw = game.homeTeam || '';
-                        const oppTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(oppRaw));
-                        const oppId = oppTeamObj ? (oppTeamObj.id ?? oppTeamObj.ID) : null;
+                        rowOppId = (game.homeId ?? game.homeTeamId ?? game.home_tid) ?? null;
                         const oppRank = game && String(game.seasonType).toLowerCase() === 'postseason'
-                          ? getCommitteeRankForTeamWeek(game.week, oppId)
-                          : getRankForTeamWeek(game.week, oppId, 'regular');
+                          ? getCommitteeRankForTeamWeek(game.week, rowOppId)
+                          : getRankForTeamWeek(game.week, rowOppId, 'regular');
                         const rankText = oppRank ? `${formatRankForDisplay(oppRank)} ` : '';
                         const rankSpan = renderRankSpan(oppRank);
                         if (game.neutralSite) {
@@ -576,10 +570,9 @@ export default function App() {
                       } else {
                         const awayRaw = game.awayTeam || '';
                         const homeRaw = game.homeTeam || '';
-                        const awayTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(awayRaw));
-                        const homeTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(homeRaw));
-                        const awayId = awayTeamObj ? (awayTeamObj.id ?? awayTeamObj.ID) : null;
-                        const homeId = homeTeamObj ? (homeTeamObj.id ?? homeTeamObj.ID) : null;
+                        const awayId = (game.awayId ?? game.awayTeamId ?? game.away_tid) ?? null;
+                        const homeId = (game.homeId ?? game.homeTeamId ?? game.home_tid) ?? null;
+                        rowOppId = null; // ambiguous; no single opponent id
                         const awayRank = game && String(game.seasonType).toLowerCase() === 'postseason'
                           ? getCommitteeRankForTeamWeek(game.week, awayId)
                           : getRankForTeamWeek(game.week, awayId, 'regular');
@@ -590,20 +583,29 @@ export default function App() {
                         const homeRankText = homeRank ? `${formatRankForDisplay(homeRank)} ` : '';
                         const awayRankSpan = renderRankSpan(awayRank);
                         const homeRankSpan = renderRankSpan(homeRank);
-                        opponentName = <>{awayRankSpan}{awayRaw}{' @ '}{homeRankSpan}{homeRaw}</>;
-                        var opponentText = `${awayRankText}${awayRaw} @ ${homeRankText}${homeRaw}`;
+                        const sep = game.neutralSite ? ' vs ' : ' @ ';
+                        opponentName = <>{awayRankSpan}{awayRaw}{sep}{homeRankSpan}{homeRaw}</>;
+                        var opponentText = `${awayRankText}${awayRaw}${sep}${homeRankText}${homeRaw}`;
                         teamScore = game.awayPoints ?? '-';
                         opponentScore = game.homePoints ?? '-';
                       }
 
-                      // Cleaned name for click handler: use the textual opponentText and remove '@', 'vs', any leading #rank, and parenthesized vote counts
-                      let displayOpponentName = (typeof opponentText === 'string' ? opponentText : String(opponentText || ''));
-                      displayOpponentName = displayOpponentName.replace(/@/g, '').trim();
-                      displayOpponentName = displayOpponentName.replace(/^vs\.?\s*/i, '').trim();
-                      displayOpponentName = displayOpponentName.replace(/^#?\d+(\s*\/\s*#?\d+)?\s*/,'').trim();
-                      displayOpponentName = displayOpponentName.replace(/\(\s*\d+\s*\)/g, '').trim();
+                      // rowOppId holds the opponent team id when available; we will pass that to the click handler
 
-                      const teamIdVal = team ? (team.id ?? team.ID) : null;
+                      // Determine opponent conference from game fields
+                      let opponentConference = '';
+                      const homeConf = game.homeConference || '';
+                      const awayConf = game.awayConference || '';
+                      if (teamIsHome) {
+                        opponentConference = awayConf;
+                      } else if (teamIsAway) {
+                        opponentConference = homeConf;
+                      } else {
+                        // ambiguous / both teams visible
+                        opponentConference = awayConf && homeConf ? `${awayConf} / ${homeConf}` : (awayConf || homeConf || '');
+                      }
+
+                      // reuse `teamIdVal` declared at the start of the loop
                       const rankStr = game && String(game.seasonType).toLowerCase() === 'postseason'
                         ? getCommitteeRankForTeamWeek(game.week, teamIdVal)
                         : getRankForTeamWeek(game.week, teamIdVal, 'regular');
@@ -619,7 +621,7 @@ export default function App() {
                               href="#"
                               onClick={(e) => {
                                 e.preventDefault();
-                                handleOpponentClick(displayOpponentName);
+                                handleOpponentClick(rowOppId);
                               }}
                               className="link-no-decoration"
                             >
@@ -632,6 +634,7 @@ export default function App() {
                             const diff = Math.abs(parseInt(teamScore, 10) - parseInt(opponentScore, 10));
                             return Math.floor(diff / 8) + (diff % 8 === 0 ? 0 : 1);
                           })()}</td>
+                          <td className="text-center">{opponentConference}</td>
                           <td>{game.venue}</td>
                         </tr>
                       );

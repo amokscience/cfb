@@ -96,7 +96,7 @@ func gamesHandler(w http.ResponseWriter, r *http.Request) {
 	if team != "" && redisService != nil {
 		// Normalize team into key-friendly string: uppercase and replace spaces with underscores
 		keyTeam := strings.ToUpper(strings.ReplaceAll(team, " ", "_"))
-		cacheKey = fmt.Sprintf("%s:%s", keyTeam, year)
+		cacheKey = fmt.Sprintf("CFB:%s:%s", keyTeam, year)
 		if exists, err := redisService.Exists(ctx, cacheKey); err == nil && exists {
 			log.Printf("Redis key found: %s", cacheKey)
 			var cached interface{}
@@ -176,11 +176,11 @@ func teamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Try to get from Redis cache first
 	if redisService != nil {
-		exists, err := redisService.Exists(ctx, "CFB_TEAMS")
+		exists, err := redisService.Exists(ctx, "CFB:TEAMS")
 		if err == nil && exists {
-			log.Printf("Redis key found: CFB_TEAMS")
+			log.Printf("Redis key found: CFB:TEAMS")
 			var teams []map[string]interface{}
-			if err := redisService.Get(ctx, "CFB_TEAMS", &teams); err == nil {
+			if err := redisService.Get(ctx, "CFB:TEAMS", &teams); err == nil {
 				w.Header().Set("Content-Type", "application/json")
 				enc := json.NewEncoder(w)
 				enc.SetIndent("", "  ")
@@ -257,10 +257,10 @@ func teamsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Cache the result in Redis for 1 year
 	if redisService != nil {
-		if err := redisService.SetWithExpiration(ctx, "CFB_TEAMS", out, 365*24*time.Hour); err != nil {
+		if err := redisService.SetWithExpiration(ctx, "CFB:TEAMS", out, 365*24*time.Hour); err != nil {
 			log.Printf("Warning: Failed to cache teams in Redis: %v", err)
 		} else {
-			log.Printf("Redis key written: CFB_TEAMS")
+			log.Printf("Redis key written: CFB:TEAMS")
 		}
 	}
 
@@ -281,7 +281,7 @@ func rankingsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := context.Background()
-	cacheKey := fmt.Sprintf("RANKINGS:%s", year)
+	cacheKey := fmt.Sprintf("CFB:RANKINGS:%s", year)
 
 	if redisService != nil {
 		if exists, err := redisService.Exists(ctx, cacheKey); err == nil && exists {
@@ -381,9 +381,9 @@ func preloadTeamsCache() error {
 	ctx := context.Background()
 
 	// Check if cache already exists
-	exists, err := redisService.Exists(ctx, "CFB_TEAMS")
+	exists, err := redisService.Exists(ctx, "CFB:TEAMS")
 	if err == nil && exists {
-		log.Printf("CFB_TEAMS cache already exists")
+		log.Printf("CFB:TEAMS cache already exists")
 		return nil
 	}
 
@@ -446,11 +446,11 @@ func preloadTeamsCache() error {
 	}
 
 	// Cache with 1 year expiration
-	if err := redisService.SetWithExpiration(ctx, "CFB_TEAMS", teams, 365*24*time.Hour); err != nil {
+	if err := redisService.SetWithExpiration(ctx, "CFB:TEAMS", teams, 365*24*time.Hour); err != nil {
 		return fmt.Errorf("failed to cache teams: %w", err)
 	}
 
-	log.Printf("Redis key written: CFB_TEAMS")
+	log.Printf("Redis key written: CFB:TEAMS")
 	return nil
 }
 
@@ -460,7 +460,7 @@ func preloadRankingsCache() error {
 	current := time.Now().Year()
 	for y := 1900; y <= current; y++ {
 		yearStr := fmt.Sprintf("%d", y)
-		key := fmt.Sprintf("RANKINGS:%s", yearStr)
+		key := fmt.Sprintf("CFB:RANKINGS:%s", yearStr)
 
 		exists, err := redisService.Exists(ctx, key)
 		if err == nil && exists {
