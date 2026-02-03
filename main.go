@@ -16,11 +16,16 @@ import (
 
 var apiKey string
 var redisService *RedisService
+var apiBase string
 
 func main() {
 	// Load .env (if present) so environment variables like CFBD_API_KEY are available.
 	loadDotEnv()
 	apiKey = os.Getenv("CFBD_API_KEY")
+	apiBase = os.Getenv("CFBD_API_BASE")
+	if apiBase == "" {
+		apiBase = "https://api.collegefootballdata.com"
+	}
 
 	// Initialize Redis service
 	var err error
@@ -108,7 +113,7 @@ func gamesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	apiURL := fmt.Sprintf("https://api.collegefootballdata.com/games?year=%s", year)
+	apiURL := fmt.Sprintf("%s/games?year=%s", apiBase, year)
 	if team != "" {
 		apiURL += fmt.Sprintf("&team=%s", url.QueryEscape(team))
 	}
@@ -188,7 +193,7 @@ func teamsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Cache miss or Redis unavailable - fetch from API
-	url := fmt.Sprintf("https://api.collegefootballdata.com/teams?year=%s", year)
+	url := fmt.Sprintf("%s/teams?year=%s", apiBase, year)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -294,7 +299,7 @@ func rankingsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	apiURL := fmt.Sprintf("https://api.collegefootballdata.com/rankings?year=%s", year)
+	apiURL := fmt.Sprintf("%s/rankings?year=%s", apiBase, year)
 	log.Printf("GET %s", apiURL)
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -385,7 +390,7 @@ func preloadTeamsCache() error {
 	log.Printf("Preloading teams into cache...")
 
 	year := fmt.Sprintf("%d", time.Now().Year())
-	apiURL := fmt.Sprintf("https://api.collegefootballdata.com/teams?year=%s", year)
+	apiURL := fmt.Sprintf("%s/teams?year=%s", apiBase, year)
 
 	req, err := http.NewRequest("GET", apiURL, nil)
 	if err != nil {
@@ -463,7 +468,7 @@ func preloadRankingsCache() error {
 			continue
 		}
 
-		apiURL := fmt.Sprintf("https://api.collegefootballdata.com/rankings?year=%s", yearStr)
+		apiURL := fmt.Sprintf("%s/rankings?year=%s", apiBase, yearStr)
 		req, err := http.NewRequest("GET", apiURL, nil)
 		if err != nil {
 			log.Printf("Warning: failed to create request for year %s: %v", yearStr, err)

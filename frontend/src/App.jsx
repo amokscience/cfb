@@ -24,6 +24,26 @@ export default function App() {
     }
   }, []);
 
+  // Global error handlers so runtime errors surface in the UI instead of blanking
+  useEffect(() => {
+    const onError = (message, source, lineno, colno, error) => {
+      console.error('Global error', { message, source, lineno, colno, error });
+      setError(String(message || error || 'Unknown error'));
+      return false;
+    };
+    const onRejection = (ev) => {
+      console.error('Unhandled rejection', ev);
+      const reason = ev && (ev.reason || ev.detail) ? (ev.reason || ev.detail) : ev;
+      setError(String(reason || 'Unhandled promise rejection'));
+    };
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onRejection);
+    return () => {
+      window.removeEventListener('error', onError);
+      window.removeEventListener('unhandledrejection', onRejection);
+    };
+  }, []);
+
   // Load teams once on mount
   useEffect(() => {
     const loadTeams = async () => {
@@ -40,31 +60,52 @@ export default function App() {
   }, []);
 
   const handleOpponentClick = async (opponentTeamName) => {
-    // Normalize clicked name: remove leading '@', 'vs', 'vs.' and trim
-    let cleanName = opponentTeamName.replace('@', '').trim();
-    cleanName = cleanName.replace(/^vs\.?\s+/i, '');
+    try {
+      console.log('handleOpponentClick start', { opponentTeamName });
+      // Normalize clicked name: remove leading '@', 'vs', 'vs.' any leading '#N' rank, and parenthesized vote counts, then trim
+      let cleanName = (opponentTeamName || '').replace(/@/g, '').trim();
+      cleanName = cleanName.replace(/^vs\.?\s+/i, '');
+      cleanName = cleanName.replace(/^#?\d+(\s*\/\s*#?\d+)?\s+/, '').trim();
+      // remove parenthesized numbers like "(25)" that represent first-place votes
+      cleanName = cleanName.replace(/\(\s*\d+\s*\)/g, '').trim();
 
-    // Find the opponent team ID from teams array
-    const opponentTeam = teams.find(t => {
-      const teamName = (t.name || t.Name || t.school || t.Alias || '').toLowerCase();
-      return teamName === cleanName.toLowerCase();
-    });
-    
-    if (opponentTeam) {
-      setSelectedTeam(opponentTeam.id || opponentTeam.ID);
-      
+      const normalize = (s) => String(s || '').toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+      const target = normalize(cleanName);
+
+      // Find the opponent team ID from teams array: exact then fuzzy
+      let opponentTeam = teams.find(t => {
+        const teamName = normalize(t.name || t.Name || t.school || t.Alias || '');
+        return teamName === target;
+      });
+      if (!opponentTeam) {
+        opponentTeam = teams.find(t => {
+          const teamName = normalize(t.name || t.Name || t.school || t.Alias || '');
+          return teamName.includes(target) || target.includes(teamName);
+        });
+      }
+
+      if (!opponentTeam) {
+        console.warn('Opponent team not found for', cleanName);
+        return;
+      }
+
+      const teamIdVal = opponentTeam.id ?? opponentTeam.ID ?? '';
+      console.log('opponentTeam resolved', { opponentTeam, teamIdVal });
+      const teamIdStr = String(teamIdVal);
+      setSelectedTeam(teamIdStr);
+
       // Update URL bar with new team
       const params = new URLSearchParams();
       params.set('year', year);
-      params.set('team', opponentTeam.id || opponentTeam.ID);
+      params.set('team', teamIdStr);
       window.history.replaceState({}, '', `?${params.toString()}`);
-      
+
       // Load games for the new team
       setLoading(true);
       setError('');
       try {
         let url = `/api/games?year=${year}`;
-        const newTeamName = opponentTeam.name || opponentTeam.Name || opponentTeam.school || opponentTeam.Alias;
+        const newTeamName = opponentTeam.name || opponentTeam.Name || opponentTeam.school || opponentTeam.Alias || '';
         url += `&team=${encodeURIComponent(newTeamName.toLowerCase())}`;
         console.log('GET', url);
         const res = await fetch(url);
@@ -78,6 +119,9 @@ export default function App() {
       } finally {
         setLoading(false);
       }
+    } catch (err) {
+      console.error('handleOpponentClick error', err);
+      setError('Error handling opponent click');
     }
   };
 
@@ -129,31 +173,26 @@ export default function App() {
     }
   };
 
-  const getRowStyle = (game) => {
-    if (!selectedTeam) return {};
-    
+  const getRowClass = (game) => {
+    if (!selectedTeam) return '';
+
     const team = teams.find(t => (t.id || t.ID) == selectedTeam);
-    if (!team) return {};
-    
+    if (!team) return '';
+
     const teamName = (team.name || team.Name || team.school || team.Alias || '').toLowerCase();
     const homeTeamName = (game.homeTeam || '').toLowerCase();
     const awayTeamName = (game.awayTeam || '').toLowerCase();
-    
-    let teamIsHome = homeTeamName.includes(teamName) || teamName.includes(homeTeamName);
-    let teamIsAway = awayTeamName.includes(teamName) || teamName.includes(awayTeamName);
-    
-    if (!teamIsHome && !teamIsAway) return {};
-    
+
+    const teamIsHome = homeTeamName.includes(teamName) || teamName.includes(homeTeamName);
+    const teamIsAway = awayTeamName.includes(teamName) || teamName.includes(awayTeamName);
+
+    if (!teamIsHome && !teamIsAway) return '';
+
     const homePoints = game.homePoints ?? 0;
     const awayPoints = game.awayPoints ?? 0;
-    
-    let won = false;
-    if (teamIsHome && homePoints > awayPoints) won = true;
-    if (teamIsAway && awayPoints > homePoints) won = true;
-    
-    return {
-      backgroundColor: won ? '#d4edda' : '#f8d7da'
-    };
+
+    const won = (teamIsHome && homePoints > awayPoints) || (teamIsAway && awayPoints > homePoints);
+    return won ? 'row-win' : 'row-loss';
   };
 
   const formatDate = (dateStr) => {
@@ -167,18 +206,15 @@ export default function App() {
     return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
   };
 
-  const getScoreCellColor = (teamScore, opponentScore) => {
-    if (teamScore === '-' || opponentScore === '-') return {};
-    
+  const getScoreCellClass = (teamScore, opponentScore) => {
+    if (teamScore === '-' || opponentScore === '-') return '';
+
     const teamScoreNum = parseInt(teamScore, 10);
     const opponentScoreNum = parseInt(opponentScore, 10);
-    
-    if (teamScoreNum > opponentScoreNum) {
-      return { backgroundColor: '#A8D8A8' }; // Muted green - win
-    } else if (teamScoreNum < opponentScoreNum) {
-      return { backgroundColor: '#F0A0A0' }; // Muted red - loss
-    }
-    return {};
+
+    if (teamScoreNum > opponentScoreNum) return 'score-win';
+    if (teamScoreNum < opponentScoreNum) return 'score-loss';
+    return '';
   };
 
   const getGameTimeStats = () => {
@@ -226,56 +262,68 @@ export default function App() {
     return { yellow, orange, purple, totalFor, totalAgainst, avgDelta };
   };
 
-  const getDateCellColor = (game) => {
+  const getDateCellClass = (game) => {
     const date = new Date(game.startDate);
     const hours = date.getHours();
-    
-    if (hours < 12) {
-      return '#ffff99'; // Bright yellow
-    } else if (hours < 18) {
-      return '#ffc266'; // Darker orange
-    } else {
-      return '#e6d9f2'; // Light purple
-    }
+
+    if (hours < 12) return 'date-morning';
+    if (hours < 18) return 'date-afternoon';
+    return 'date-evening';
   };
 
-  const normalizeName = (s) => (s || '').toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+  const normalizeName = (s) => String(s || '').toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
 
-  const getRankForTeamWeek = (week, teamName) => {
-    if (!rankings || rankings.length === 0 || !teamName) return '';
-    const target = normalizeName(teamName);
+  // Now requires `teamId` (number or string) and `seasonType` to disambiguate regular vs postseason
+  const getRankForTeamWeek = (week, teamId, seasonType = 'regular') => {
+    if (!rankings || rankings.length === 0 || !teamId) return '';
 
-    // Find rankings entry for the given week
+    // Find rankings entry for the given week AND seasonType
     const rankEntry = rankings.find(r => {
-      // some ranking objects use numeric week, some strings
       if (r.week == null) return false;
-      return String(r.week) === String(week);
+      if (r.seasonType == null) return false;
+      return String(r.week) === String(week) && String(r.seasonType).toLowerCase() === String(seasonType).toLowerCase();
     });
     if (!rankEntry || !Array.isArray(rankEntry.polls)) return '';
 
-    // Prefer AP Top 25 then Coaches Poll, otherwise first poll
-    const preferred = ['AP Top 25', 'Coaches Poll'];
-    let poll = null;
-    for (const pName of preferred) {
-      poll = rankEntry.polls.find(p => p.poll === pName);
-      if (poll) break;
-    }
-    if (!poll) poll = rankEntry.polls[0];
-    if (!poll || !Array.isArray(poll.ranks)) return '';
+    const maybeId = Number(teamId);
+    if (isNaN(maybeId) || maybeId <= 0) return '';
 
-    // Search ranks for matching team
-    for (let i = 0; i < poll.ranks.length; i++) {
-      const r = poll.ranks[i];
-      const candidate = normalizeName(r.school || r.team || r.name || r.school_name || r.schoolName || '');
-      if (candidate && (candidate === target || candidate.includes(target) || target.includes(candidate))) {
-        // prefer explicit rank field if present
-        if (r.rank != null) return String(r.rank);
-        if (r.position != null) return String(r.position);
-        // fallback to index+1
-        return String(i + 1);
-      }
+    let apRank = null;
+    let coachesRank = null;
+
+    for (const p of rankEntry.polls) {
+      if (!Array.isArray(p.ranks)) continue;
+      const pollName = p.poll || '';
+      const found = p.ranks.find(r => Number(r.teamId) === maybeId || Number(r.team_id) === maybeId || Number(r.teamID) === maybeId);
+      if (!found) continue;
+      const rVal = found.rank != null ? Number(found.rank) : (found.position != null ? Number(found.position) : null);
+      if (pollName === 'AP Top 25') apRank = rVal;
+      if (pollName === 'Coaches Poll') coachesRank = rVal;
+      // if neither AP/Coaches, consider as apRank fallback
+      if (apRank == null && coachesRank == null && rVal != null) apRank = rVal;
     }
+
+    if (apRank != null && coachesRank != null) {
+      if (apRank === coachesRank) return String(apRank);
+      return `${apRank}/${coachesRank}`;
+    }
+    if (apRank != null) return String(apRank);
+    if (coachesRank != null) return String(coachesRank);
     return '';
+  };
+
+  const formatRankForDisplay = (rankStr) => {
+    if (!rankStr) return '';
+    // rankStr may be 'A' or 'A/B'
+    if (rankStr.includes('/')) {
+      return rankStr.split('/').map(s => `#${s.trim()}`).join(' / ');
+    }
+    return `#${rankStr}`;
+  };
+
+  const renderRankSpan = (rankStr) => {
+    if (!rankStr) return null;
+    return <span className="rank">{formatRankForDisplay(rankStr)} </span>;
   };
 
   return (
@@ -412,52 +460,72 @@ export default function App() {
 
                       if (teamIsHome) {
                         const oppRaw = game.awayTeam || '';
-                        const oppRank = getRankForTeamWeek(game.week, oppRaw);
-                        const rankPart = oppRank ? `#${oppRank} ` : '';
+                        // try find opponent team id
+                        const oppTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(oppRaw));
+                        const oppId = oppTeamObj ? (oppTeamObj.id ?? oppTeamObj.ID) : null;
+                        const oppRank = getRankForTeamWeek(game.week, oppId, game.seasonType);
+                        const rankText = oppRank ? `${formatRankForDisplay(oppRank)} ` : '';
+                        const rankSpan = renderRankSpan(oppRank);
                         if (game.neutralSite) {
-                          opponentName = `vs ${rankPart}${oppRaw}`;
+                          opponentName = <>{'vs '}{rankSpan}{oppRaw}</>;
+                          var opponentText = `vs ${rankText}${oppRaw}`;
                         } else {
-                          opponentName = `${rankPart}${oppRaw}`;
+                          opponentName = <>{rankSpan}{oppRaw}</>;
+                          var opponentText = `${rankText}${oppRaw}`;
                         }
                         teamScore = game.homePoints ?? '-';
                         opponentScore = game.awayPoints ?? '-';
                       } else if (teamIsAway) {
                         const oppRaw = game.homeTeam || '';
-                        const oppRank = getRankForTeamWeek(game.week, oppRaw);
-                        const rankPart = oppRank ? `#${oppRank} ` : '';
+                        const oppTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(oppRaw));
+                        const oppId = oppTeamObj ? (oppTeamObj.id ?? oppTeamObj.ID) : null;
+                        const oppRank = getRankForTeamWeek(game.week, oppId, game.seasonType);
+                        const rankText = oppRank ? `${formatRankForDisplay(oppRank)} ` : '';
+                        const rankSpan = renderRankSpan(oppRank);
                         if (game.neutralSite) {
-                          opponentName = `vs ${rankPart}${oppRaw}`;
+                          opponentName = <>{'vs '}{rankSpan}{oppRaw}</>;
+                          var opponentText = `vs ${rankText}${oppRaw}`;
                         } else {
-                          opponentName = `@ ${rankPart}${oppRaw}`;
+                          opponentName = <>{'@ '}{rankSpan}{oppRaw}</>;
+                          var opponentText = `@ ${rankText}${oppRaw}`;
                         }
                         teamScore = game.awayPoints ?? '-';
                         opponentScore = game.homePoints ?? '-';
                       } else {
                         const awayRaw = game.awayTeam || '';
                         const homeRaw = game.homeTeam || '';
-                        const awayRank = getRankForTeamWeek(game.week, awayRaw);
-                        const homeRank = getRankForTeamWeek(game.week, homeRaw);
-                        const awayRankPart = awayRank ? `#${awayRank} ` : '';
-                        const homeRankPart = homeRank ? `#${homeRank} ` : '';
-                        opponentName = `${awayRankPart}${awayRaw} @ ${homeRankPart}${homeRaw}`;
+                        const awayTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(awayRaw));
+                        const homeTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(homeRaw));
+                        const awayId = awayTeamObj ? (awayTeamObj.id ?? awayTeamObj.ID) : null;
+                        const homeId = homeTeamObj ? (homeTeamObj.id ?? homeTeamObj.ID) : null;
+                        const awayRank = getRankForTeamWeek(game.week, awayId, game.seasonType);
+                        const homeRank = getRankForTeamWeek(game.week, homeId, game.seasonType);
+                        const awayRankText = awayRank ? `${formatRankForDisplay(awayRank)} ` : '';
+                        const homeRankText = homeRank ? `${formatRankForDisplay(homeRank)} ` : '';
+                        const awayRankSpan = renderRankSpan(awayRank);
+                        const homeRankSpan = renderRankSpan(homeRank);
+                        opponentName = <>{awayRankSpan}{awayRaw}{' @ '}{homeRankSpan}{homeRaw}</>;
+                        var opponentText = `${awayRankText}${awayRaw} @ ${homeRankText}${homeRaw}`;
                         teamScore = game.awayPoints ?? '-';
                         opponentScore = game.homePoints ?? '-';
                       }
 
-                      // Cleaned name for click handler: remove '@', 'vs', and any leading #rank
-                      let displayOpponentName = opponentName.replace(/@/g, '').trim();
+                      // Cleaned name for click handler: use the textual opponentText and remove '@', 'vs', any leading #rank, and parenthesized vote counts
+                      let displayOpponentName = (typeof opponentText === 'string' ? opponentText : String(opponentText || ''));
+                      displayOpponentName = displayOpponentName.replace(/@/g, '').trim();
                       displayOpponentName = displayOpponentName.replace(/^vs\.?\s*/i, '').trim();
-                      displayOpponentName = displayOpponentName.replace(/^#\d+\s*/,'').trim();
+                      displayOpponentName = displayOpponentName.replace(/^#?\d+(\s*\/\s*#?\d+)?\s*/,'').trim();
+                      displayOpponentName = displayOpponentName.replace(/\(\s*\d+\s*\)/g, '').trim();
 
-                      const teamDisplayName = team ? (team.name || team.Name || team.school || team.Alias || '') : '';
-                      const rankStr = getRankForTeamWeek(game.week, teamDisplayName);
-                      const rankDisplay = rankStr ? `#${rankStr}` : '';
+                      const teamIdVal = team ? (team.id ?? team.ID) : null;
+                      const rankStr = getRankForTeamWeek(game.week, teamIdVal, game.seasonType);
+                      const rankDisplay = rankStr ? formatRankForDisplay(rankStr) : '';
 
                       rows.push(
-                        <tr key={game.id || `game-${idx}`} style={getRowStyle(game)}>
-                          <td style={{ backgroundColor: getDateCellColor(game) }}>{formatDate(game.startDate)}</td>
+                        <tr key={game.id || `game-${idx}`} className={getRowClass(game)}>
+                          <td className={getDateCellClass(game)}>{formatDate(game.startDate)}</td>
                           <td className="text-center">{game.seasonType === 'postseason' ? 'Bowl' : game.week}</td>
-                          <td className="text-center">{rankDisplay}</td>
+                          <td className="text-center">{rankDisplay ? <span className="rank">{rankDisplay}</span> : ''}</td>
                           <td>
                             <a
                               href="#"
@@ -465,12 +533,12 @@ export default function App() {
                                 e.preventDefault();
                                 handleOpponentClick(displayOpponentName);
                               }}
-                              style={{ textDecoration: 'none', color: 'inherit' }}
+                              className="link-no-decoration"
                             >
                               {opponentName}
                             </a>
                           </td>
-                          <td className="text-center" style={getScoreCellColor(teamScore, opponentScore)}>{teamScore}-{opponentScore}</td>
+                          <td className={`text-center ${getScoreCellClass(teamScore, opponentScore)}`}>{teamScore}-{opponentScore}</td>
                           <td className="text-center">{teamScore === '-' || opponentScore === '-' ? '-' : parseInt(teamScore, 10) - parseInt(opponentScore, 10)}</td>
                           <td className="text-center">{teamScore === '-' || opponentScore === '-' ? '-' : (() => {
                             const diff = Math.abs(parseInt(teamScore, 10) - parseInt(opponentScore, 10));

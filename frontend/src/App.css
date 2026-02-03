@@ -1,0 +1,22 @@
+.rank { color: #999; }
+
+.date-morning { background-color: #ffff99; }
+.date-afternoon { background-color: #ffc266; }
+.date-evening { background-color: #e6d9f2; }
+
+.score-win { background-color: #A8D8A8; }
+.score-loss { background-color: #F0A0A0; }
+
+.row-win { background-color: #d4edda; }
+.row-loss { background-color: #f8d7da; }
+
+.link-no-decoration { text-decoration: none; color: inherit; }
+.link-no-decoration:link,
+.link-no-decoration:visited,
+.link-no-decoration:hover,
+.link-no-decoration:active,
+.link-no-decoration:focus {
+	text-decoration: none;
+	color: inherit;
+	cursor: pointer;
+}
