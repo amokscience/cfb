@@ -215,6 +215,40 @@ export default function App() {
     return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
   };
 
+  const formatAttendance = (val) => {
+    if (val == null || val === '') return '';
+    const n = Number(val);
+    if (isNaN(n)) return String(val);
+    return n.toLocaleString();
+  };
+
+  const getHomeAttendanceAverage = () => {
+    if (!selectedTeam) return '';
+    const team = teams.find(t => (t.id || t.ID) == selectedTeam);
+    if (!team) return '';
+    const teamIdStr = String((team.id ?? team.ID) || '');
+    if (!teamIdStr) return '';
+
+    let sum = 0;
+    let count = 0;
+    games.forEach(game => {
+      const homeId = String(game.homeId ?? game.homeTeamId ?? game.home_tid ?? '');
+      const awayId = String(game.awayId ?? game.awayTeamId ?? game.away_tid ?? '');
+      const teamIsHome = homeId && homeId === teamIdStr;
+      // Exclude neutral site games and away games
+      if (!teamIsHome) return;
+      if (game.neutralSite) return;
+      const att = game.attendance;
+      const n = Number(att);
+      if (att == null || att === '' || isNaN(n)) return;
+      sum += n;
+      count += 1;
+    });
+    if (count === 0) return '';
+    const avg = Math.round(sum / count);
+    return formatAttendance(avg);
+  };
+
   const getDateCellStyle = (game) => {
     const date = new Date(game.startDate);
     const hours = date.getHours();
@@ -488,6 +522,7 @@ export default function App() {
                     <th>Pos</th>
                     <th>Conference</th>
                     <th>Venue</th>
+                    <th>Attendance</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -520,6 +555,8 @@ export default function App() {
                               <td className="text-center">-</td>
                               <td className="text-center">-</td>
                               <td className="text-center">-</td>
+                              <td></td>
+                              <td></td>
                               <td></td>
                             </tr>
                           );
@@ -636,6 +673,7 @@ export default function App() {
                           })()}</td>
                           <td className="text-center">{opponentConference}</td>
                           <td>{game.venue}</td>
+                          <td className="text-end">{formatAttendance(game.attendance)}</td>
                         </tr>
                       );
 
@@ -663,6 +701,9 @@ export default function App() {
                     })()}</td>
                     <td></td>
                     <td></td>
+                    <td></td>
+                    <td></td>
+                    <td className="text-end">{getHomeAttendanceAverage()}</td>
                   </tr>
                 </tfoot>
               </Table>

@@ -58,6 +58,9 @@ func main() {
 	mux.Handle("/assets/", http.FileServer(http.Dir("frontend/dist")))
 	// Serve index.html for all other routes (SPA fallback)
 	mux.HandleFunc("/", spaHandler)
+	// Health endpoints for k8s probes
+	mux.HandleFunc("/healthz", healthHandler)
+	mux.HandleFunc("/readyz", readyHandler)
 
 	port := os.Getenv("HTTP_PORT")
 	if port == "" {
@@ -79,6 +82,28 @@ func spaHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.Write(data)
+}
+
+// healthHandler is a simple liveness endpoint for container health checks.
+// Returns static success so Kubernetes liveness probes can use it.
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"status":"ok"}`))
+}
+
+// readyHandler can be used for readiness checks. If Redis is configured, verify connectivity.
+func readyHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	if redisService != nil {
+		if _, err := redisService.Exists(ctx, "CFB:READINESS_CHECK"); err != nil {
+			http.Error(w, "redis not ready", http.StatusServiceUnavailable)
+			return
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(`{"ready":true}`))
 }
 
 // gamesHandler proxies requests to the College Football Data API `/games` endpoint.
