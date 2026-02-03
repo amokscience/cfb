@@ -360,18 +360,61 @@ export default function App() {
     return <span className="rank">{formatRankForDisplay(rankStr)} </span>;
   };
 
+  // Return postseason AP Top 25 rank for a team (use AP Top 25 where seasonType is 'postseason')
+  const getPostseasonRankForTeam = (teamId) => {
+    if (!rankings || rankings.length === 0 || !teamId) return '';
+    const maybeId = Number(teamId);
+    if (isNaN(maybeId) || maybeId <= 0) return '';
+
+    for (const rankEntry of rankings) {
+      if (!rankEntry || String(rankEntry.seasonType).toLowerCase() !== 'postseason') continue;
+      if (!Array.isArray(rankEntry.polls)) continue;
+      for (const p of rankEntry.polls) {
+        const pollName = (p.poll || '').trim();
+        if (pollName !== 'AP Top 25') continue;
+        if (!Array.isArray(p.ranks)) continue;
+        const found = p.ranks.find(r => Number(r.teamId) === maybeId || Number(r.team_id) === maybeId || Number(r.teamID) === maybeId);
+        if (!found) continue;
+        const rVal = found.rank != null ? Number(found.rank) : (found.position != null ? Number(found.position) : null);
+        return rVal != null ? String(rVal) : '';
+      }
+    }
+    return '';
+  };
+
+  // Return Playoff Committee Rankings rank for a given postseason week and team
+  const getCommitteeRankForTeamWeek = (week, teamId) => {
+    if (!rankings || rankings.length === 0 || !teamId) return '';
+    const maybeId = Number(teamId);
+    if (isNaN(maybeId) || maybeId <= 0) return '';
+
+    const rankEntry = rankings.find(r => r.week != null && String(r.week) === String(week) && String(r.seasonType).toLowerCase() === 'postseason');
+    if (!rankEntry || !Array.isArray(rankEntry.polls)) return '';
+
+    for (const p of rankEntry.polls) {
+      const pollName = (p.poll || '').trim();
+      if (pollName !== 'Playoff Committee Rankings') continue;
+      if (!Array.isArray(p.ranks)) continue;
+      const found = p.ranks.find(r => Number(r.teamId) === maybeId || Number(r.team_id) === maybeId || Number(r.teamID) === maybeId);
+      if (!found) continue;
+      const rVal = found.rank != null ? Number(found.rank) : (found.position != null ? Number(found.position) : null);
+      return rVal != null ? String(rVal) : '';
+    }
+    return '';
+  };
+
   return (
     <Container className="mt-5">
       <Row className="mb-4">
         <Col md={8}>
-          <h1>College Football Season</h1>
+          <h2>College Football Season</h2>
         </Col>
       </Row>
 
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Row className="mb-3">
-        <Col md={6}>
+        <Col md={3}>
           <Form.Group>
             <Form.Label>Team</Form.Label>
             <Form.Select
@@ -387,10 +430,7 @@ export default function App() {
             </Form.Select>
           </Form.Group>
         </Col>
-      </Row>
-
-      <Row className="mb-3">
-        <Col md={6}>
+        <Col md={3}>
           <Form.Group>
             <Form.Label>Year</Form.Label>
             <Form.Control
@@ -400,7 +440,7 @@ export default function App() {
             />
           </Form.Group>
         </Col>
-        <Col md={6} className="d-flex align-items-end">
+        <Col md={3} className="d-flex align-items-end">
           <Button
             variant="primary"
             onClick={loadSeason}
@@ -437,7 +477,11 @@ export default function App() {
                   }
                 }
               });
-              return `${year} ${teamName} ${wins}-${losses}`;
+
+              // include postseason rank between year and team name
+              const postseasonRank = getPostseasonRankForTeam(selectedTeam);
+              const psText = postseasonRank ? `${formatRankForDisplay(postseasonRank)} ` : '';
+              return `${year} ${psText} ${teamName} ${wins}-${losses}`;
             })()}</h3>
             <div className="table-responsive">
               <Table striped bordered hover>
@@ -497,7 +541,9 @@ export default function App() {
                         // try find opponent team id
                         const oppTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(oppRaw));
                         const oppId = oppTeamObj ? (oppTeamObj.id ?? oppTeamObj.ID) : null;
-                        const oppRank = getRankForTeamWeek(game.week, oppId, game.seasonType);
+                        const oppRank = game && String(game.seasonType).toLowerCase() === 'postseason'
+                          ? getCommitteeRankForTeamWeek(game.week, oppId)
+                          : getRankForTeamWeek(game.week, oppId, 'regular');
                         const rankText = oppRank ? `${formatRankForDisplay(oppRank)} ` : '';
                         const rankSpan = renderRankSpan(oppRank);
                         if (game.neutralSite) {
@@ -513,7 +559,9 @@ export default function App() {
                         const oppRaw = game.homeTeam || '';
                         const oppTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(oppRaw));
                         const oppId = oppTeamObj ? (oppTeamObj.id ?? oppTeamObj.ID) : null;
-                        const oppRank = getRankForTeamWeek(game.week, oppId, game.seasonType);
+                        const oppRank = game && String(game.seasonType).toLowerCase() === 'postseason'
+                          ? getCommitteeRankForTeamWeek(game.week, oppId)
+                          : getRankForTeamWeek(game.week, oppId, 'regular');
                         const rankText = oppRank ? `${formatRankForDisplay(oppRank)} ` : '';
                         const rankSpan = renderRankSpan(oppRank);
                         if (game.neutralSite) {
@@ -532,8 +580,12 @@ export default function App() {
                         const homeTeamObj = teams.find(t => normalizeName(t.name || t.Name || t.school || t.Alias || '') === normalizeName(homeRaw));
                         const awayId = awayTeamObj ? (awayTeamObj.id ?? awayTeamObj.ID) : null;
                         const homeId = homeTeamObj ? (homeTeamObj.id ?? homeTeamObj.ID) : null;
-                        const awayRank = getRankForTeamWeek(game.week, awayId, game.seasonType);
-                        const homeRank = getRankForTeamWeek(game.week, homeId, game.seasonType);
+                        const awayRank = game && String(game.seasonType).toLowerCase() === 'postseason'
+                          ? getCommitteeRankForTeamWeek(game.week, awayId)
+                          : getRankForTeamWeek(game.week, awayId, 'regular');
+                        const homeRank = game && String(game.seasonType).toLowerCase() === 'postseason'
+                          ? getCommitteeRankForTeamWeek(game.week, homeId)
+                          : getRankForTeamWeek(game.week, homeId, 'regular');
                         const awayRankText = awayRank ? `${formatRankForDisplay(awayRank)} ` : '';
                         const homeRankText = homeRank ? `${formatRankForDisplay(homeRank)} ` : '';
                         const awayRankSpan = renderRankSpan(awayRank);
@@ -552,7 +604,9 @@ export default function App() {
                       displayOpponentName = displayOpponentName.replace(/\(\s*\d+\s*\)/g, '').trim();
 
                       const teamIdVal = team ? (team.id ?? team.ID) : null;
-                      const rankStr = getRankForTeamWeek(game.week, teamIdVal, game.seasonType);
+                      const rankStr = game && String(game.seasonType).toLowerCase() === 'postseason'
+                        ? getCommitteeRankForTeamWeek(game.week, teamIdVal)
+                        : getRankForTeamWeek(game.week, teamIdVal, 'regular');
                       const rankDisplay = rankStr ? formatRankForDisplay(rankStr) : '';
 
                       rows.push(
