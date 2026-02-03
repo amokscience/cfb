@@ -11,12 +11,23 @@
 .row-loss { background-color: #f8d7da; }
 
 .link-no-decoration { text-decoration: none; color: inherit; }
-.link-no-decoration:link,
-.link-no-decoration:visited,
-.link-no-decoration:hover,
-.link-no-decoration:active,
-.link-no-decoration:focus {
-	text-decoration: none;
-	color: inherit;
+a.link-no-decoration,
+a.link-no-decoration:link,
+a.link-no-decoration:visited,
+a.link-no-decoration:hover,
+a.link-no-decoration:active,
+a.link-no-decoration:focus {
+	text-decoration: none !important;
+	color: inherit !important;
 	cursor: pointer;
 }
+
+/* Stronger selectors to override bootstrap table styles */
+.table tbody tr.row-win td { background-color: #d4edda !important; }
+.table tbody tr.row-loss td { background-color: #f8d7da !important; }
+.table td.date-morning { background-color: #ffff99 !important; }
+.table td.date-afternoon { background-color: #ffc266 !important; }
+.table td.date-evening { background-color: #e6d9f2 !important; }
+.table td.score-win { background-color: #A8D8A8 !important; }
+.table td.score-loss { background-color: #F0A0A0 !important; }
+.rank { color: #666 !important; }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Alert, Table } from 'react-bootstrap';
+import './App.css';
 
 export default function App() {
   const [year, setYear] = useState(new Date().getFullYear());
@@ -195,6 +196,22 @@ export default function App() {
     return won ? 'row-win' : 'row-loss';
   };
 
+  const getRowStyleInline = (game) => {
+    if (!selectedTeam) return {};
+    const team = teams.find(t => (t.id || t.ID) == selectedTeam);
+    if (!team) return {};
+    const teamName = (team.name || team.Name || team.school || team.Alias || '').toLowerCase();
+    const homeTeamName = (game.homeTeam || '').toLowerCase();
+    const awayTeamName = (game.awayTeam || '').toLowerCase();
+    const teamIsHome = homeTeamName.includes(teamName) || teamName.includes(homeTeamName);
+    const teamIsAway = awayTeamName.includes(teamName) || teamName.includes(awayTeamName);
+    if (!teamIsHome && !teamIsAway) return {};
+    const homePoints = game.homePoints ?? 0;
+    const awayPoints = game.awayPoints ?? 0;
+    const won = (teamIsHome && homePoints > awayPoints) || (teamIsAway && awayPoints > homePoints);
+    return { backgroundColor: won ? '#d4edda' : '#f8d7da' };
+  };
+
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     const year = date.getFullYear();
@@ -206,6 +223,14 @@ export default function App() {
     return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
   };
 
+  const getDateCellStyle = (game) => {
+    const date = new Date(game.startDate);
+    const hours = date.getHours();
+    if (hours < 12) return { backgroundColor: '#ffff99' };
+    if (hours < 18) return { backgroundColor: '#ffc266' };
+    return { backgroundColor: '#e6d9f2' };
+  };
+
   const getScoreCellClass = (teamScore, opponentScore) => {
     if (teamScore === '-' || opponentScore === '-') return '';
 
@@ -215,6 +240,15 @@ export default function App() {
     if (teamScoreNum > opponentScoreNum) return 'score-win';
     if (teamScoreNum < opponentScoreNum) return 'score-loss';
     return '';
+  };
+
+  const getScoreCellStyle = (teamScore, opponentScore) => {
+    if (teamScore === '-' || opponentScore === '-') return {};
+    const teamScoreNum = parseInt(teamScore, 10);
+    const opponentScoreNum = parseInt(opponentScore, 10);
+    if (teamScoreNum > opponentScoreNum) return { backgroundColor: '#A8D8A8' };
+    if (teamScoreNum < opponentScoreNum) return { backgroundColor: '#F0A0A0' };
+    return {};
   };
 
   const getGameTimeStats = () => {
@@ -522,8 +556,8 @@ export default function App() {
                       const rankDisplay = rankStr ? formatRankForDisplay(rankStr) : '';
 
                       rows.push(
-                        <tr key={game.id || `game-${idx}`} className={getRowClass(game)}>
-                          <td className={getDateCellClass(game)}>{formatDate(game.startDate)}</td>
+                        <tr key={game.id || `game-${idx}`}>
+                          <td className={getDateCellClass(game)} style={getDateCellStyle(game)}>{formatDate(game.startDate)}</td>
                           <td className="text-center">{game.seasonType === 'postseason' ? 'Bowl' : game.week}</td>
                           <td className="text-center">{rankDisplay ? <span className="rank">{rankDisplay}</span> : ''}</td>
                           <td>
@@ -538,7 +572,7 @@ export default function App() {
                               {opponentName}
                             </a>
                           </td>
-                          <td className={`text-center ${getScoreCellClass(teamScore, opponentScore)}`}>{teamScore}-{opponentScore}</td>
+                          <td className={`text-center ${getScoreCellClass(teamScore, opponentScore)}`} style={getScoreCellStyle(teamScore, opponentScore)}>{teamScore}-{opponentScore}</td>
                           <td className="text-center">{teamScore === '-' || opponentScore === '-' ? '-' : parseInt(teamScore, 10) - parseInt(opponentScore, 10)}</td>
                           <td className="text-center">{teamScore === '-' || opponentScore === '-' ? '-' : (() => {
                             const diff = Math.abs(parseInt(teamScore, 10) - parseInt(opponentScore, 10));
