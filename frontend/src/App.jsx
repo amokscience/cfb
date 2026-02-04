@@ -215,6 +215,24 @@ export default function App() {
     return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
   };
 
+  const formatDateOnly = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const formatTimeOnly = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const hours = String(date.getHours() % 12 || 12).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
+    return `${hours}:${minutes} ${ampm}`;
+  };
+
   const formatAttendance = (val) => {
     if (val == null || val === '') return '';
     const n = Number(val);
@@ -513,8 +531,9 @@ export default function App() {
               <Table striped bordered hover>
                 <thead>
                   <tr>
-                    <th>Week</th>
                     <th>Date</th>
+                    <th>Time</th>
+                    <th>Week</th>
                     <th>Rank</th>
                     <th>Opponent</th>
                     <th>Score</th>
@@ -548,8 +567,9 @@ export default function App() {
                         for (let w = prevWeekNum + 1; w < weekNum; w++) {
                           rows.push(
                             <tr key={`bye-${w}-${idx}`}>
-                              <td className="text-center">{w}</td>
                               <td></td>
+                              <td></td>
+                              <td className="text-center">{w}</td>
                               <td></td>
                               <td>bye</td>
                               <td className="text-center">-</td>
@@ -650,8 +670,9 @@ export default function App() {
 
                       rows.push(
                         <tr key={game.id || `game-${idx}`}>
+                          <td>{formatDateOnly(game.startDate)}</td>
+                          <td className={getDateCellClass(game)} style={getDateCellStyle(game)}>{formatTimeOnly(game.startDate)}</td>
                           <td className="text-center">{game.seasonType === 'postseason' ? 'Bowl' : game.week}</td>
-                          <td className={getDateCellClass(game)} style={getDateCellStyle(game)}>{formatDate(game.startDate)}</td>
                           <td className="text-center">{rankDisplay ? <span className="rank">{rankDisplay}</span> : ''}</td>
                           <td>
                             <a
@@ -685,11 +706,11 @@ export default function App() {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td></td>
                     <td>{(() => {
                       const stats = getGameTimeStats();
                       return `🟨 ${stats.yellow} / 🟧 ${stats.orange} / 🟪 ${stats.purple}`;
                     })()}</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td className="text-center">{(() => {
