@@ -227,7 +227,7 @@ export default function App() {
   const formatTimeOnly = (dateStr) => {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    const hours = String(date.getHours() % 12 || 12).padStart(2, '0');
+    const hours = String(date.getHours() % 12 || 12);
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const ampm = date.getHours() >= 12 ? 'PM' : 'AM';
     return `${hours}:${minutes} ${ampm}`;
