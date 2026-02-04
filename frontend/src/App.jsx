@@ -513,8 +513,8 @@ export default function App() {
               <Table striped bordered hover>
                 <thead>
                   <tr>
-                    <th>Date</th>
                     <th>Week</th>
+                    <th>Date</th>
                     <th>Rank</th>
                     <th>Opponent</th>
                     <th>Score</th>
@@ -548,8 +548,8 @@ export default function App() {
                         for (let w = prevWeekNum + 1; w < weekNum; w++) {
                           rows.push(
                             <tr key={`bye-${w}-${idx}`}>
-                              <td></td>
                               <td className="text-center">{w}</td>
+                              <td></td>
                               <td></td>
                               <td>bye</td>
                               <td className="text-center">-</td>
@@ -650,8 +650,8 @@ export default function App() {
 
                       rows.push(
                         <tr key={game.id || `game-${idx}`}>
-                          <td className={getDateCellClass(game)} style={getDateCellStyle(game)}>{formatDate(game.startDate)}</td>
                           <td className="text-center">{game.seasonType === 'postseason' ? 'Bowl' : game.week}</td>
+                          <td className={getDateCellClass(game)} style={getDateCellStyle(game)}>{formatDate(game.startDate)}</td>
                           <td className="text-center">{rankDisplay ? <span className="rank">{rankDisplay}</span> : ''}</td>
                           <td>
                             <a
@@ -685,11 +685,13 @@ export default function App() {
                 </tbody>
                 <tfoot>
                   <tr>
+                    <td></td>
                     <td>{(() => {
                       const stats = getGameTimeStats();
                       return `🟨 ${stats.yellow} / 🟧 ${stats.orange} / 🟪 ${stats.purple}`;
                     })()}</td>
-                    <td colSpan="2"></td>
+                    <td></td>
+                    <td></td>
                     <td className="text-center">{(() => {
                       const stats = getGameTimeStats();
                       const sum = stats.totalFor - stats.totalAgainst;
