@@ -8,8 +8,7 @@ RUN npm install --no-audit --no-fund
 RUN npm run build
 
 # Stage 2: build Go backend
-FROM golang:1.20-alpine AS go-builder
-RUN apk add --no-cache build-base git
+FROM golang:1.20 AS go-builder
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
