@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+.npm
+
+# Frontend build (will be rebuilt in Docker)
+frontend/dist
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+
+# IDE & OS
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Build artifacts
+dist
+build
+
+# Test coverage
+coverage
+.nyc_output
+
+# Temporary
+tmp
+temp
+*.tmp
+
