@@ -749,11 +749,12 @@ export default function App() {
                   })()}
                 </tbody>
                 <tfoot>
-                  <tr>
+                  <tr className="nobr">
                     <td>{(() => {
                       const stats = getGameTimeStats();
                       return `🟨 ${stats.yellow} / 🟧 ${stats.orange} / 🟪 ${stats.purple}`;
                     })()}</td>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -766,7 +767,6 @@ export default function App() {
                       const stats = getGameTimeStats();
                       return stats.avgDelta;
                     })()}</td>
-                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
