@@ -10,6 +10,8 @@ export default function App() {
   const [rankings, setRankings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [infoData, setInfoData] = useState(null);
+  const [showInfoPopover, setShowInfoPopover] = useState(false);
 
   // Parse URL parameters on mount
   useEffect(() => {
@@ -59,6 +61,20 @@ export default function App() {
     };
     loadTeams();
   }, []);
+
+  // Fetch API info
+  const fetchInfo = async () => {
+    try {
+      const res = await fetch('/api/info');
+      if (!res.ok) throw new Error('Failed to fetch API info');
+      const data = await res.json();
+      setInfoData(data);
+      setShowInfoPopover(true);
+    } catch (e) {
+      setError('Error fetching API info: ' + e.message);
+      setShowInfoPopover(true);
+    }
+  };
 
   // New: handle clicks by teamId (no name matching)
   const handleOpponentClick = async (opponentTeamId) => {
@@ -449,9 +465,37 @@ export default function App() {
 
   return (
     <Container className="mt-5">
-      <Row className="">
+      <Row className="mb-3">
         <Col md={8}>
           <h2>College Football Season</h2>
+        </Col>
+        <Col md={4} className="d-flex justify-content-end">
+          <Button variant="info" size="sm" onClick={fetchInfo} title="Check API remaining calls">
+            API Info
+          </Button>
+          {showInfoPopover && (
+            <div className="position-absolute" style={{ top: '50px', right: '10px', zIndex: 1050 }}>
+              <div className="alert alert-info" role="alert" style={{ minWidth: '250px', marginBottom: 0 }}>
+                <strong>API Status</strong>
+                {infoData ? (
+                  <>
+                    <hr style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }} />
+                    <div>Remaining Calls: <strong>{infoData.remainingCalls ?? 'N/A'}</strong></div>
+                    {infoData.totalCalls && <div>Total Calls: <strong>{infoData.totalCalls}</strong></div>}
+                  </>
+                ) : (
+                  <div>Loading...</div>
+                )}
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => setShowInfoPopover(false)}
+                  style={{ position: 'absolute', top: '10px', right: '10px' }}
+                />
+              </div>
+            </div>
+          )}
         </Col>
       </Row>
 

@@ -54,6 +54,7 @@ func main() {
 	mux.HandleFunc("/api/teams", teamsHandler)
 	mux.HandleFunc("/api/rankings", rankingsHandler)
 	mux.HandleFunc("/api/games", gamesHandler)
+	mux.HandleFunc("/api/info", infoHandler)
 	// Serve static assets from React build output
 	mux.Handle("/assets/", http.FileServer(http.Dir("frontend/dist")))
 	// Serve index.html for all other routes (SPA fallback)
@@ -82,6 +83,38 @@ func spaHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.Write(data)
+}
+
+// infoHandler proxies requests to the College Football Data API `/info` endpoint.
+// Returns API usage information including remainingCalls.
+func infoHandler(w http.ResponseWriter, r *http.Request) {
+	apiURL := fmt.Sprintf("%s/info", apiBase)
+	log.Printf("GET %s", apiURL)
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if apiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+apiKey)
+	}
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(body)
 }
 
 // healthHandler is a simple liveness endpoint for container health checks.
