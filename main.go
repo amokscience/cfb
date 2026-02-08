@@ -55,6 +55,7 @@ func main() {
 	mux.HandleFunc("/api/rankings", rankingsHandler)
 	mux.HandleFunc("/api/games", gamesHandler)
 	mux.HandleFunc("/api/info", infoHandler)
+	mux.HandleFunc("/api/config", configHandler)
 	// Serve static assets from React build output
 	mux.Handle("/assets/", http.FileServer(http.Dir("frontend/dist")))
 	// Serve index.html for all other routes (SPA fallback)
@@ -83,6 +84,18 @@ func spaHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.Write(data)
+}
+
+// configHandler returns environment configuration values for the frontend.
+func configHandler(w http.ResponseWriter, r *http.Request) {
+	config := map[string]string{
+		"HTTP_PORT":     os.Getenv("HTTP_PORT"),
+		"CFBD_API_BASE": apiBase,
+		"CFBD_API_KEY":  apiKey,
+		"REDIS_ADDR":    os.Getenv("REDIS_ADDR"),
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(config)
 }
 
 // infoHandler proxies requests to the College Football Data API `/info` endpoint.

@@ -12,6 +12,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [infoData, setInfoData] = useState(null);
   const [showInfoPopover, setShowInfoPopover] = useState(false);
+  const [configData, setConfigData] = useState(null);
 
   // Parse URL parameters on mount
   useEffect(() => {
@@ -60,6 +61,21 @@ export default function App() {
       }
     };
     loadTeams();
+  }, []);
+
+  // Load config on mount
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const res = await fetch('/api/config');
+        if (!res.ok) throw new Error('Failed to load config');
+        const data = await res.json();
+        setConfigData(data);
+      } catch (e) {
+        console.error('Error loading config:', e);
+      }
+    };
+    loadConfig();
   }, []);
 
   // Fetch API info
@@ -782,6 +798,36 @@ export default function App() {
 
       {!loading && games.length === 0 && !error && (
         <Alert variant="info">Click "Load Season" to view games for {year}</Alert>
+      )}
+
+      {configData && (
+        <Row className="mt-5">
+          <Col>
+            <div style={{ backgroundColor: '#f8f9fa', padding: '1rem', borderRadius: '0.25rem', marginBottom: '2rem' }}>
+              <h5>Configuration</h5>
+              <table style={{ width: '100%', fontSize: '0.875rem' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ fontWeight: 'bold', paddingRight: '1rem' }}>HTTP_PORT:</td>
+                    <td><code>{configData.HTTP_PORT || 'N/A'}</code></td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold', paddingRight: '1rem' }}>CFBD_API_BASE:</td>
+                    <td><code>{configData.CFBD_API_BASE || 'N/A'}</code></td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold', paddingRight: '1rem' }}>CFBD_API_KEY:</td>
+                    <td><code>{configData.CFBD_API_KEY ? configData.CFBD_API_KEY.substring(0, 8) + '...' : 'N/A'}</code></td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold', paddingRight: '1rem' }}>REDIS_ADDR:</td>
+                    <td><code>{configData.REDIS_ADDR || 'N/A'}</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </Col>
+        </Row>
       )}
     </Container>
     </div>
