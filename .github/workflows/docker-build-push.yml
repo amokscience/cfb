@@ -61,9 +61,12 @@ jobs:
           git clone https://github.com/amokscience/gitops.git
           cd gitops
           
-          # Update values-dev.yaml with new image tag
-          sed -i "s/tag: \"dev-.*/tag: \"dev-${{ github.sha }}\"/" cfb/helm/values-dev.yaml
+          # Get short SHA (first 7 chars, matching DockerHub's display)
+          SHORT_SHA=${{ github.sha }}
+          SHORT_SHA=${SHORT_SHA:0:7}
           
+          # Update values-dev.yaml with new image tag
+          sed -i "s/tag: \"dev-.*/tag: \"dev-${SHORT_SHA}\"/" cfb/helm/values-dev.yaml
           # Check if there are changes
           if git diff --quiet; then
             echo "No changes to commit"
@@ -74,7 +77,7 @@ jobs:
           git config user.email "bot@example.com"
           git config user.name "GitHub Actions Bot"
           git add cfb/helm/values-dev.yaml
-          git commit -m "Update dev image tag to dev-${{ github.sha }}"
+          git commit -m "Update dev image tag to dev-${SHORT_SHA}"
           git remote set-url origin https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/amokscience/gitops.git
           git push origin HEAD:main
 
