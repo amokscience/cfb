@@ -464,7 +464,8 @@ export default function App() {
   };
 
   return (
-    <Container className="mt-5">
+    <div className="page-bg">
+      <Container className="">
       <Row className="mb-3">
         <Col md={8}>
           <h2>College Football Season</h2>
@@ -572,7 +573,7 @@ export default function App() {
               return `${year} ${psText} ${teamName} ${wins}-${losses}`;
             })()}</h3>
             <div className="table-responsive">
-              <Table striped bordered hover>
+              <Table striped bordered hover className="w-100">
                 <thead>
                   <tr>
                     <th>Date</th>
@@ -714,7 +715,7 @@ export default function App() {
 
                       rows.push(
                         <tr key={game.id || `game-${idx}`}>
-                          <td>{formatDateOnly(game.startDate)}</td>
+                          <td className={game.notes && game.notes.includes('Championship') ? 'date-championship' : (game.seasonType === 'postseason' ? 'date-postseason' : '')}>{formatDateOnly(game.startDate)}</td>
                           <td className={getDateCellClass(game)} style={getDateCellStyle(game)}>{formatTimeOnly(game.startDate)}</td>
                           <td className="text-center">{game.seasonType === 'postseason' ? 'Bowl' : game.week}</td>
                           <td className="text-center">{rankDisplay ? <span className="rank">{rankDisplay}</span> : ''}</td>
@@ -783,5 +784,6 @@ export default function App() {
         <Alert variant="info">Click "Load Season" to view games for {year}</Alert>
       )}
     </Container>
+    </div>
   );
 }
