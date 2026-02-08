@@ -56,7 +56,7 @@ jobs:
           cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/cfb:buildcache,mode=max
 
       - name: Update GitOps repo with new image tag
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/dev'
+        if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/dev'
         run: |
           git clone https://github.com/amokscience/gitops.git
           cd gitops
