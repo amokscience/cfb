@@ -484,7 +484,7 @@ export default function App() {
       <Container className="">
       <Row className="mb-3">
         <Col md={8}>
-          <h2>College Football Season</h2>
+          <h2>College Football Season v1</h2>
         </Col>
         <Col md={4} className="d-flex justify-content-end">
           <Button variant="info" size="sm" onClick={fetchInfo} title="Check API remaining calls">
